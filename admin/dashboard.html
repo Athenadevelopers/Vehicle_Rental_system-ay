@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - VehicleRent Pro</title>
+    
+    <!-- CSS Libraries -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link href="../assets/css/style.css" rel="stylesheet">
+    
+    <!-- Firebase SDK -->
+    <script type="module" src="../assets/js/firebase-config.js"></script>
+</head>
+<body class="bg-gray-100">
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="fixed inset-0 bg-white z-50 flex items-center justify-center">
+        <div class="text-center">
+            <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-primary-600 mx-auto mb-4"></div>
+            <h3 class="text-lg font-medium text-gray-900">Loading Admin Dashboard...</h3>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform -translate-x-full transition-transform duration-300 ease-in-out lg:translate-x-0">
+        <div class="flex items-center justify-center h-16 bg-primary-600">
+            <div class="flex items-center">
+                <div class="w-8 h-8 bg-white rounded-lg flex items-center justify-center mr-3">
+                    <i class="fas fa-car-side text-primary-600"></i>
+                </div>
+                <span class="text-white font-bold text-lg">VehicleRent Pro</span>
+            </div>
+        </div>
+        
+        <nav class="mt-8">
+            <div class="px-4 space-y-2">
+                <a href="#dashboard" class="nav-item active flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-primary-50 hover:text-primary-600 transition">
+                    <i class="fas fa-tachometer-alt mr-3"></i>
+                    Dashboard
+                </a>
+                <a href="#vehicles" class="nav-item flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-primary-50 hover:text-primary-600 transition">
+                    <i class="fas fa-car mr-3"></i>
+                    Vehicles
+                </a>
+                <a href="#bookings" class="nav-item flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-primary-50 hover:text-primary-600 transition">
+                    <i class="fas fa-calendar-alt mr-3"></i>
+                    Bookings
+                </a>
+                <a href="#customers" class="nav-item flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-primary-50 hover:text-primary-600 transition">
+                    <i class="fas fa-users mr-3"></i>
+                    Customers
+                </a>
+                <a href="#categories" class="nav-item flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-primary-50 hover:text-primary-600 transition">
+                    <i class="fas fa-tags mr-3"></i>
+                    Categories
+                </a>
+                <a href="#payments" class="nav-item flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-primary-50 hover:text-primary-600 transition">
+                    <i class="fas fa-credit-card mr-3"></i>
+                    Payments
+                </a>
+                <a href="#reports" class="nav-item flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-primary-50 hover:text-primary-600 transition">
+                    <i class="fas fa-chart-bar mr-3"></i>
+                    Reports
+                </a>
+                <a href="#settings" class="nav-item flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-primary-50 hover:text-primary-600 transition">
+                    <i class="fas fa-cog mr-3"></i>
+                    Settings
+                </a>
+            </div>
+        </nav>
+        
+        <div class="absolute bottom-0 w-full p-4">
+            <button id="logout-btn" class="w-full flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-red-50 hover:text-red-600 transition">
+                <i class="fas fa-sign-out-alt mr-3"></i>
+                Logout
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="lg:ml-64">
+        <!-- Top Navigation -->
+        <header class="bg-white shadow-sm border-b border-gray-200">
+            <div class="flex items-center justify-between px-6 py-4">
+                <div class="flex items-center">
+                    <button id="sidebar-toggle" class="lg:hidden text-gray-600 hover:text-gray-900 mr-4">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                    <h1 id="page-title" class="text-2xl font-bold text-gray-900">Dashboard</h1>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <!-- Notifications -->
+                    <button class="relative text-gray-600 hover:text-gray-900">
+                        <i class="fas fa-bell text-xl"></i>
+                        <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">3</span>
+                    </button>
+                    
+                    <!-- User Menu -->
+                    <div class="relative">
+                        <button id="user-menu-btn" class="flex items-center space-x-3 text-gray-700 hover:text-primary-600 transition">
+                            <img id="admin-avatar" src="https://via.placeholder.com/32" alt="Admin Avatar" class="w-8 h-8 rounded-full">
+                            <span id="admin-name" class="font-medium">Admin User</span>
+                            <i class="fas fa-chevron-down text-xs"></i>
+                        </button>
+                        
+                        <div id="user-dropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border hidden">
+                            <div class="py-2">
+                                <a href="#profile" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <i class="fas fa-user mr-2"></i>Profile
+                                </a>
+                                <a href="#settings" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <i class="fas fa-cog mr-2"></i>Settings
+                                </a>
+                                <div class="border-t border-gray-100 my-1"></div>
+                                <button id="logout-btn-header" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Page Content -->
+        <main class="p-6">
+            <!-- Dashboard Section -->
+            <div id="dashboard-section" class="section active">
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-car text-blue-600 text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <h3 class="text-sm font-medium text-gray-500">Total Vehicles</h3>
+                                <p id="total-vehicles" class="text-2xl font-bold text-gray-900">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-calendar-check text-green-600 text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <h3 class="text-sm font-medium text-gray-500">Active Bookings</h3>
+                                <p id="active-bookings" class="text-2xl font-bold text-gray-900">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-users text-purple-600 text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <h3 class="text-sm font-medium text-gray-500">Total Customers</h3>
+                                <p id="total-customers" class="text-2xl font-bold text-gray-900">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-dollar-sign text-yellow-600 text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <h3 class="text-sm font-medium text-gray-500">Total Revenue</h3>
+                                <p id="total-revenue" class="text-2xl font-bold text-gray-900">$0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-lg shadow">
+                        <div class="p-6 border-b border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-900">Recent Bookings</h3>
+                        </div>
+                        <div class="p-6">
+                            <div id="recent-bookings" class="space-y-4">
+                                <!-- Recent bookings will be loaded here -->
+                                <div class="text-center py-8 text-gray-500">
+                                    <i class="fas fa-calendar-alt text-3xl mb-2"></i>
+                                    <p>Loading recent bookings...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow">
+                        <div class="p-6 border-b border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-900">Vehicle Status</h3>
+                        </div>
+                        <div class="p-6">
+                            <div id="vehicle-status" class="space-y-4">
+                                <!-- Vehicle status will be loaded here -->
+                                <div class="text-center py-8 text-gray-500">
+                                    <i class="fas fa-car text-3xl mb-2"></i>
+                                    <p>Loading vehicle status...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vehicles Section -->
+            <div id="vehicles-section" class="section hidden">
+                <div class="bg-white rounded-lg shadow">
+                    <div class="p-6 border-b border-gray-200">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-lg font-semibold text-gray-900">Vehicle Management</h3>
+                            <button id="add-vehicle-btn" class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg transition">
+                                <i class="fas fa-plus mr-2"></i>Add Vehicle
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div id="vehicles-table" class="overflow-x-auto">
+                            <!-- Vehicles table will be loaded here -->
+                            <div class="text-center py-8 text-gray-500">
+                                <i class="fas fa-car text-3xl mb-2"></i>
+                                <p>Loading vehicles...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bookings Section -->
+            <div id="bookings-section" class="section hidden">
+                <div class="bg-white rounded-lg shadow">
+                    <div class="p-6 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-900">Booking Management</h3>
+                    </div>
+                    <div class="p-6">
+                        <div id="bookings-table" class="overflow-x-auto">
+                            <!-- Bookings table will be loaded here -->
+                            <div class="text-center py-8 text-gray-500">
+                                <i class="fas fa-calendar-alt text-3xl mb-2"></i>
+                                <p>Loading bookings...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Customers Section -->
+            <div id="customers-section" class="section hidden">
+                <div class="bg-white rounded-lg shadow">
+                    <div class="p-6 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-900">Customer Management</h3>
+                    </div>
+                    <div class="p-6">
+                        <div id="customers-table" class="overflow-x-auto">
+                            <!-- Customers table will be loaded here -->
+                            <div class="text-center py-8 text-gray-500">
+                                <i class="fas fa-users text-3xl mb-2"></i>
+                                <p>Loading customers...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Categories Section -->
+            <div id="categories-section" class="section hidden">
+                <div class="bg-white rounded-lg shadow">
+                    <div class="p-6 border-b border-gray-200">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-lg font-semibold text-gray-900">Category Management</h3>
+                            <button id="add-category-btn" class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg transition">
+                                <i class="fas fa-plus mr-2"></i>Add Category
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div id="categories-table" class="overflow-x-auto">
+                            <!-- Categories table will be loaded here -->
+                            <div class="text-center py-8 text-gray-500">
+                                <i class="fas fa-tags text-3xl mb-2"></i>
+                                <p>Loading categories...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Other sections would be similar... -->
+            <!-- Footer -->
+            <footer class="mt-8 pt-4 border-t border-gray-200 text-center text-gray-500 text-sm">
+                <p>&copy; 2024 VehicleRent Pro. All rights reserved.</p>
+                <p class="mt-1">Developed by: Sahan Weerasinghe @ Athena Development (pvt) Ltd 2025</p>
+            </footer>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div id="modal-overlay" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div id="modal-content" class="bg-white rounded-lg p-6 max-w-md w-full mx-4 max-h-screen overflow-y-auto">
+            <!-- Modal content will be loaded dynamically -->
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="notification-toast" class="fixed top-4 right-4 bg-white rounded-lg shadow-lg border p-4 transform translate-x-full transition-transform duration-300 z-50">
+        <div class="flex items-center">
+            <div id="toast-icon" class="w-8 h-8 rounded-full flex items-center justify-center mr-3">
+                <i class="fas fa-check text-white"></i>
+            </div>
+            <div>
+                <h4 id="toast-title" class="font-semibold text-gray-800">Success</h4>
+                <p id="toast-message" class="text-sm text-gray-600">Operation completed successfully</p>
+            </div>
+            <button id="close-toast" class="ml-4 text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script type="module" src="../assets/js/admin.js"></script>
+</body>
+</html>
