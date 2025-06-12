@@ -15,29 +15,86 @@ class VehicleRentalApp {
       priceRange: "all",
       fuelType: "all",
     }
+    this.firebaseReady = false
 
     this.init()
   }
 
   async init() {
-    // Initialize AOS
-    AOS.init({
-      duration: 1000,
-      once: true,
+    try {
+      // Wait for Firebase to be initialized
+      await this.waitForFirebase()
+
+      // Initialize AOS
+      AOS.init({
+        duration: 1000,
+        once: true,
+      })
+
+      // Set up event listeners
+      this.setupEventListeners()
+
+      // Load initial data
+      await this.loadCategories()
+      await this.loadVehicles()
+
+      // Hide loading screen
+      this.hideLoadingScreen()
+
+      // Set default dates
+      this.setDefaultDates()
+
+      console.log("✅ VehicleRentalApp initialized successfully")
+    } catch (error) {
+      console.error("❌ VehicleRentalApp initialization failed:", error)
+      this.showInitializationError(error.message)
+    }
+  }
+
+  async waitForFirebase() {
+    return new Promise((resolve, reject) => {
+      // Check if Firebase is already initialized
+      if (window.firebaseInitializer && window.firebaseInitializer.isInitialized()) {
+        this.firebaseReady = true
+        resolve()
+        return
+      }
+
+      // Listen for Firebase initialization event
+      const handleFirebaseInit = (event) => {
+        if (event.detail.success) {
+          this.firebaseReady = true
+          resolve()
+        } else {
+          reject(new Error(event.detail.error || "Firebase initialization failed"))
+        }
+        window.removeEventListener("firebaseInitialized", handleFirebaseInit)
+      }
+
+      window.addEventListener("firebaseInitialized", handleFirebaseInit)
+
+      // Timeout after 30 seconds
+      setTimeout(() => {
+        window.removeEventListener("firebaseInitialized", handleFirebaseInit)
+        reject(new Error("Firebase initialization timeout"))
+      }, 30000)
     })
+  }
 
-    // Set up event listeners
-    this.setupEventListeners()
-
-    // Load initial data
-    await this.loadCategories()
-    await this.loadVehicles()
-
-    // Hide loading screen
-    this.hideLoadingScreen()
-
-    // Set default dates
-    this.setDefaultDates()
+  showInitializationError(message) {
+    const loadingScreen = document.getElementById("loading-screen")
+    if (loadingScreen) {
+      loadingScreen.innerHTML = `
+      <div class="text-center">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4"></div>
+        <h3 class="text-xl font-semibold text-red-600 mb-2">Initialization Failed</h3>
+        <p class="text-gray-600 mb-4">${message}</p>
+        <button onclick="location.reload()" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
+          Retry
+        </button>
+      </div>
+    `
+    }
   }
 
   setupEventListeners() {

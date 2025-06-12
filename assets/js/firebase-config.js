@@ -945,6 +945,33 @@ export class FirebaseAuthManager {
     const role = await this.getUserRole()
     return role === "customer"
   }
+
+  // Wait for auth state to be determined
+  waitForAuth() {
+    return new Promise((resolve) => {
+      if (this.currentUser !== null) {
+        resolve(this.currentUser)
+      } else {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+          this.currentUser = user
+          unsubscribe()
+          resolve(user)
+        })
+      }
+    })
+  }
+
+  async initialize() {
+    try {
+      // Wait for auth state to be determined
+      await this.waitForAuth()
+      console.log("Firebase Auth initialized successfully")
+      return { success: true }
+    } catch (error) {
+      console.error("Firebase Auth initialization failed:", error)
+      return { success: false, error: error.message }
+    }
+  }
 }
 
 // Initialize Firebase Auth Manager
