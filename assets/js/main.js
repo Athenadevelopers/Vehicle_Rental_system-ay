@@ -1,911 +1,54 @@
-/**
- * Main JavaScript file for VehicleRentPro
- */
+// Import Firebase configuration and managers
+import { firebaseAuth, firebaseDB } from "./firebase-config.js"
+import AOS from "aos" // Declare the AOS variable
 
-// Declare AOS and firebase variables
-let AOS
-let firebase
+// Initialize AOS (Animate On Scroll)
+document.addEventListener("DOMContentLoaded", () => {
+  AOS.init({
+    duration: 1000,
+    once: true,
+    offset: 100,
+  })
 
-class VehicleRentalApp {
-  constructor() {
-    this.currentUser = null
-    this.vehicles = []
-    this.categories = []
-    this.currentFilters = {
-      category: "all",
-      priceRange: "all",
-      fuelType: "all",
-    }
-    this.firebaseReady = false
-
-    this.init()
-  }
-
-  async init() {
-    try {
-      // Wait for Firebase to be initialized
-      await this.waitForFirebase()
-
-      // Initialize AOS if available
-      if (typeof AOS !== "undefined") {
-        AOS.init({
-          duration: 800,
-          easing: "ease-in-out",
-          once: true,
-        })
-      }
-
-      // Set up event listeners
-      this.setupEventListeners()
-
-      // Load initial data
-      await this.loadCategories()
-      await this.loadVehicles()
-
-      // Hide loading screen
-      this.hideLoadingScreen()
-
-      // Set default dates
-      this.setDefaultDates()
-
-      console.log("✅ VehicleRentalApp initialized successfully")
-    } catch (error) {
-      console.error("❌ VehicleRentalApp initialization failed:", error)
-      this.showInitializationError(error.message)
-    }
-  }
-
-  async waitForFirebase() {
-    return new Promise((resolve, reject) => {
-      // Check if Firebase is already available
-      if (typeof firebase !== "undefined" && window.firebaseDB && window.firebaseAuth) {
-        this.firebaseReady = true
-        resolve()
-        return
-      }
-
-      // Wait for Firebase to be loaded
-      let attempts = 0
-      const maxAttempts = 50 // 5 seconds max wait
-
-      const checkFirebase = () => {
-        attempts++
-
-        if (typeof firebase !== "undefined" && window.firebaseDB && window.firebaseAuth) {
-          this.firebaseReady = true
-          resolve()
-        } else if (attempts >= maxAttempts) {
-          reject(new Error("Firebase initialization timeout"))
-        } else {
-          setTimeout(checkFirebase, 100)
-        }
-      }
-
-      checkFirebase()
-    })
-  }
-
-  showInitializationError(message) {
+  // Hide loading screen
+  setTimeout(() => {
     const loadingScreen = document.getElementById("loading-screen")
     if (loadingScreen) {
-      loadingScreen.innerHTML = `
-      <div class="text-center">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4"></div>
-        <h3 class="text-xl font-semibold text-red-600 mb-2">Initialization Failed</h3>
-        <p class="text-gray-600 mb-4">${message}</p>
-        <button onclick="location.reload()" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
-          Retry
-        </button>
-      </div>
-    `
-    }
-  }
-
-  setupEventListeners() {
-    // Navigation
-    document.getElementById("mobile-menu-btn")?.addEventListener("click", this.toggleMobileMenu)
-    document.getElementById("user-menu-btn")?.addEventListener("click", this.toggleUserMenu)
-
-    // Auth buttons
-    document.getElementById("login-btn")?.addEventListener("click", () => this.showAuthModal("login"))
-    document.getElementById("register-btn")?.addEventListener("click", () => this.showAuthModal("register"))
-    document.getElementById("logout-btn")?.addEventListener("click", () => this.handleLogout())
-
-    // Modal controls
-    document.getElementById("close-auth-modal")?.addEventListener("click", this.hideAuthModal)
-    document.getElementById("close-toast")?.addEventListener("click", this.hideNotification)
-
-    // Search form
-    document.getElementById("vehicle-search-form")?.addEventListener("submit", this.handleSearch.bind(this))
-
-    // Contact form
-    document.getElementById("contact-form")?.addEventListener("submit", this.handleContactForm.bind(this))
-
-    // Hero buttons
-    document.getElementById("browse-vehicles-btn")?.addEventListener("click", () => {
-      document.getElementById("vehicles")?.scrollIntoView({ behavior: "smooth" })
-    })
-
-    document.getElementById("how-it-works-btn")?.addEventListener("click", () => {
-      document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })
-    })
-
-    document.getElementById("get-started-btn")?.addEventListener("click", () => this.showAuthModal("register"))
-
-    // Vehicle filters
-    document.addEventListener("click", (e) => {
-      if (e.target.classList.contains("vehicle-filter")) {
-        this.handleFilterClick(e.target)
-      }
-    })
-
-    // Smooth scrolling for navigation links
-    document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
-      anchor.addEventListener("click", function (e) {
-        e.preventDefault()
-        const target = document.querySelector(this.getAttribute("href"))
-        if (target) {
-          target.scrollIntoView({ behavior: "smooth" })
-        }
-      })
-    })
-  }
-
-  async loadCategories() {
-    try {
-      if (!window.firebaseDB) return
-
-      const result = await window.firebaseDB.getCategories()
-      if (result.success) {
-        this.categories = result.categories
-        this.renderCategoryFilters()
-        this.populateCategorySelect()
-      }
-    } catch (error) {
-      console.error("Error loading categories:", error)
-    }
-  }
-
-  async loadVehicles() {
-    try {
-      if (!window.firebaseDB) return
-
-      const result = await window.firebaseDB.getVehicles("available")
-      if (result.success) {
-        this.vehicles = result.vehicles
-        this.renderVehicles()
-        this.updateStats()
-      }
-    } catch (error) {
-      console.error("Error loading vehicles:", error)
-      this.showNotification("Error", "Failed to load vehicles", "error")
-    }
-  }
-
-  renderCategoryFilters() {
-    const filtersContainer = document.querySelector(".flex.flex-wrap.justify-center.gap-4.mb-12")
-    if (!filtersContainer) return
-
-    // Clear existing filters except "All Vehicles"
-    const allButton = filtersContainer.querySelector('[data-category="all"]')
-    if (allButton) {
-      filtersContainer.innerHTML = ""
-      filtersContainer.appendChild(allButton)
-
-      // Add category filters
-      this.categories.forEach((category) => {
-        const button = document.createElement("button")
-        button.className =
-          "vehicle-filter px-6 py-2 rounded-full bg-gray-200 text-gray-700 hover:bg-primary-600 hover:text-white transition"
-        button.setAttribute("data-category", category.id)
-        button.innerHTML = `<i class="${category.icon} mr-2"></i>${category.name}`
-        filtersContainer.appendChild(button)
-      })
-    }
-  }
-
-  populateCategorySelect() {
-    const categorySelect = document.getElementById("category")
-    if (!categorySelect) return
-
-    // Clear existing options except the first one
-    categorySelect.innerHTML = '<option value="">All Vehicle Types</option>'
-
-    // Add category options
-    this.categories.forEach((category) => {
-      const option = document.createElement("option")
-      option.value = category.id
-      option.textContent = category.name
-      categorySelect.appendChild(option)
-    })
-  }
-
-  renderVehicles(vehiclesToRender = null) {
-    const vehiclesGrid = document.getElementById("vehicles-grid")
-    if (!vehiclesGrid) return
-
-    const vehicles = vehiclesToRender || this.vehicles
-
-    if (vehicles.length === 0) {
-      vehiclesGrid.innerHTML = `
-        <div class="col-span-full text-center py-16">
-          <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <i class="fas fa-car text-3xl text-gray-400"></i>
-          </div>
-          <h3 class="text-xl font-semibold text-gray-700 mb-2">No Vehicles Available</h3>
-          <p class="text-gray-500">Please check back later or adjust your filters.</p>
-        </div>
-      `
-      return
-    }
-
-    vehiclesGrid.innerHTML = vehicles
-      .map(
-        (vehicle, index) => `
-      <div class="group bg-white rounded-2xl shadow-lg hover:shadow-xl overflow-hidden border border-gray-100 hover:border-primary-200 transition-all duration-300" 
-           data-aos="fade-up" 
-           data-aos-delay="${200 + (index % 3) * 100}"
-           data-vehicle-id="${vehicle.id}">
-        
-        <!-- Image Container -->
-        <div class="relative overflow-hidden">
-          <img src="${vehicle.imageUrl || "https://images.unsplash.com/photo-1549924231-f129b911e442?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"}" 
-               alt="${vehicle.make} ${vehicle.model}" 
-               class="w-full h-56 object-cover group-hover:scale-110 transition-transform duration-500">
-          
-          <!-- Status Badge -->
-          <div class="absolute top-4 right-4">
-            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-              <div class="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
-              Available
-            </span>
-          </div>
-          
-          <!-- Category Badge -->
-          <div class="absolute top-4 left-4">
-            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-white/90 text-gray-800">
-              ${this.getCategoryName(vehicle.categoryId)}
-            </span>
-          </div>
-          
-          <!-- Favorite Button -->
-          <button class="absolute bottom-4 right-4 w-10 h-10 bg-white/90 hover:bg-white rounded-full flex items-center justify-center text-gray-600 hover:text-red-500 transition-all duration-300 opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0">
-            <i class="far fa-heart"></i>
-          </button>
-        </div>
-        
-        <!-- Card Content -->
-        <div class="p-6">
-          <div class="flex justify-between items-start mb-4">
-            <div>
-              <h3 class="text-xl font-bold text-gray-800 group-hover:text-primary-600 transition-colors">
-                ${vehicle.make} ${vehicle.model}
-              </h3>
-              <p class="text-sm text-gray-500 mt-1">${vehicle.year} Model</p>
-            </div>
-            <div class="text-right">
-              <div class="text-2xl font-bold text-primary-600">$${vehicle.dailyRate}</div>
-              <div class="text-xs text-gray-500">per day</div>
-            </div>
-          </div>
-          
-          <!-- Vehicle Specs -->
-          <div class="grid grid-cols-2 gap-4 mb-6">
-            <div class="flex items-center text-sm text-gray-600">
-              <div class="w-8 h-8 bg-primary-50 rounded-lg flex items-center justify-center mr-3">
-                <i class="fas fa-users text-primary-600 text-xs"></i>
-              </div>
-              <span>${vehicle.seats} Seats</span>
-            </div>
-            <div class="flex items-center text-sm text-gray-600">
-              <div class="w-8 h-8 bg-primary-50 rounded-lg flex items-center justify-center mr-3">
-                <i class="fas fa-gas-pump text-primary-600 text-xs"></i>
-              </div>
-              <span>${this.capitalize(vehicle.fuelType)}</span>
-            </div>
-            <div class="flex items-center text-sm text-gray-600">
-              <div class="w-8 h-8 bg-primary-50 rounded-lg flex items-center justify-center mr-3">
-                <i class="fas fa-cogs text-primary-600 text-xs"></i>
-              </div>
-              <span>${this.capitalize(vehicle.transmission)}</span>
-            </div>
-            <div class="flex items-center text-sm text-gray-600">
-              <div class="w-8 h-8 bg-primary-50 rounded-lg flex items-center justify-center mr-3">
-                <i class="fas fa-star text-primary-600 text-xs"></i>
-              </div>
-              <span>4.8 Rating</span>
-            </div>
-          </div>
-          
-          <!-- Action Buttons -->
-          <div class="flex gap-3">
-            <button onclick="app.handleBookVehicle('${vehicle.id}')" 
-                   class="flex-1 bg-primary-600 hover:bg-primary-700 text-white px-4 py-3 rounded-lg transition text-center font-medium group-hover:shadow-lg transform group-hover:-translate-y-1">
-              <i class="fas fa-calendar-check mr-2"></i>Book Now
-            </button>
-            <button onclick="app.showVehicleDetails('${vehicle.id}')" 
-                   class="bg-gray-100 hover:bg-gray-200 text-gray-600 px-4 py-3 rounded-lg transition flex items-center justify-center" 
-                   title="View Details">
-              <i class="fas fa-eye"></i>
-            </button>
-          </div>
-        </div>
-      </div>
-    `,
-      )
-      .join("")
-  }
-
-  getCategoryName(categoryId) {
-    const category = this.categories.find((cat) => cat.id === categoryId)
-    return category ? category.name : "Vehicle"
-  }
-
-  capitalize(str) {
-    return str.charAt(0).toUpperCase() + str.slice(1)
-  }
-
-  handleFilterClick(button) {
-    // Update active filter
-    document.querySelectorAll(".vehicle-filter").forEach((btn) => {
-      btn.classList.remove("active", "bg-primary-600", "text-white")
-      btn.classList.add("bg-gray-200", "text-gray-700")
-    })
-
-    button.classList.add("active", "bg-primary-600", "text-white")
-    button.classList.remove("bg-gray-200", "text-gray-700")
-
-    // Filter vehicles
-    const category = button.getAttribute("data-category")
-    this.currentFilters.category = category
-
-    let filteredVehicles = this.vehicles
-    if (category !== "all") {
-      filteredVehicles = this.vehicles.filter((vehicle) => vehicle.categoryId === category)
-    }
-
-    this.renderVehicles(filteredVehicles)
-  }
-
-  async handleSearch(e) {
-    e.preventDefault()
-
-    const formData = new FormData(e.target)
-    const searchData = {
-      pickupDate: formData.get("pickup_date"),
-      returnDate: formData.get("return_date"),
-      category: formData.get("category"),
-      location: formData.get("location"),
-    }
-
-    // Validate dates
-    if (new Date(searchData.pickupDate) >= new Date(searchData.returnDate)) {
-      this.showNotification("Error", "Return date must be after pickup date", "error")
-      return
-    }
-
-    // Filter vehicles based on search criteria
-    let filteredVehicles = this.vehicles
-
-    if (searchData.category) {
-      filteredVehicles = filteredVehicles.filter((vehicle) => vehicle.categoryId === searchData.category)
-    }
-
-    this.renderVehicles(filteredVehicles)
-
-    // Scroll to vehicles section
-    document.getElementById("vehicles")?.scrollIntoView({ behavior: "smooth" })
-
-    this.showNotification("Success", `Found ${filteredVehicles.length} available vehicles`, "success")
-  }
-
-  async handleContactForm(e) {
-    e.preventDefault()
-
-    const formData = new FormData(e.target)
-    const contactData = {
-      name: formData.get("name"),
-      email: formData.get("email"),
-      subject: formData.get("subject"),
-      message: formData.get("message"),
-    }
-
-    try {
-      // In a real app, you would send this to Firebase or an email service
-      console.log("Contact form submitted:", contactData)
-
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      this.showNotification("Success", "Message sent successfully! We'll get back to you soon.", "success")
-      e.target.reset()
-    } catch (error) {
-      this.showNotification("Error", "Failed to send message. Please try again.", "error")
-    }
-  }
-
-  async handleBookVehicle(vehicleId) {
-    if (!window.firebaseAuth || !window.firebaseAuth.isAuthenticated()) {
-      this.showAuthModal("login")
-      return
-    }
-
-    // In a real app, this would open a booking modal or redirect to booking page
-    this.showNotification("Info", "Booking feature will be implemented in the full version", "info")
-  }
-
-  showVehicleDetails(vehicleId) {
-    const vehicle = this.vehicles.find((v) => v.id === vehicleId)
-    if (!vehicle) return
-
-    // In a real app, this would show a detailed modal or redirect to vehicle page
-    alert(
-      `Vehicle Details:\n\n${vehicle.make} ${vehicle.model} (${vehicle.year})\nDaily Rate: $${vehicle.dailyRate}\nFeatures: ${vehicle.features}`,
-    )
-  }
-
-  showAuthModal(type = "login") {
-    const modal = document.getElementById("auth-modal")
-    const title = document.getElementById("auth-modal-title")
-    const content = document.getElementById("auth-modal-content")
-
-    if (!modal || !title || !content) return
-
-    title.textContent = type === "login" ? "Sign In" : "Create Account"
-
-    if (type === "login") {
-      content.innerHTML = this.getLoginFormHTML()
-    } else {
-      content.innerHTML = this.getRegisterFormHTML()
-    }
-
-    modal.classList.remove("hidden")
-    modal.classList.add("flex")
-
-    // Set up form event listeners
-    this.setupAuthFormListeners(type)
-  }
-
-  hideAuthModal() {
-    const modal = document.getElementById("auth-modal")
-    if (modal) {
-      modal.classList.add("hidden")
-      modal.classList.remove("flex")
-    }
-  }
-
-  getLoginFormHTML() {
-    return `
-      <!-- Social Login Buttons -->
-      <div class="space-y-3 mb-6">
-        <button type="button" id="google-signin-btn"
-                class="w-full flex justify-center items-center px-4 py-3 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition">
-          <svg class="w-5 h-5 mr-3" viewBox="0 0 24 24">
-            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-          </svg>
-          Continue with Google
-        </button>
-
-        <button type="button" id="facebook-signin-btn"
-                class="w-full flex justify-center items-center px-4 py-3 border border-gray-300 rounded-md shadow-sm bg-blue-600 text-sm font-medium text-white hover:bg-blue-700 transition">
-          <i class="fab fa-facebook-f mr-3"></i>
-          Continue with Facebook
-        </button>
-      </div>
-
-      <!-- Divider -->
-      <div class="relative mb-6">
-        <div class="absolute inset-0 flex items-center">
-          <div class="w-full border-t border-gray-300"></div>
-        </div>
-        <div class="relative flex justify-center text-sm">
-          <span class="px-2 bg-white text-gray-500">Or continue with email</span>
-        </div>
-      </div>
-
-      <!-- Email Login Form -->
-      <form id="email-login-form" class="space-y-6">
-        <div>
-          <label for="login-email" class="block text-sm font-medium text-gray-700 mb-2">Email</label>
-          <input type="email" id="login-email" name="email" required
-                 class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                 placeholder="Enter your email">
-        </div>
-        
-        <div>
-          <label for="login-password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
-          <input type="password" id="login-password" name="password" required
-                 class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                 placeholder="Enter your password">
-        </div>
-        
-        <div class="flex items-center justify-between">
-          <div class="flex items-center">
-            <input id="remember-me" name="remember-me" type="checkbox" class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded">
-            <label for="remember-me" class="ml-2 block text-sm text-gray-700">Remember me</label>
-          </div>
-          <button type="button" id="forgot-password-btn" class="text-sm text-primary-600 hover:text-primary-500">Forgot password?</button>
-        </div>
-        
-        <button type="submit" class="w-full bg-primary-600 hover:bg-primary-700 text-white px-4 py-3 rounded-md transition font-medium">
-          Sign In
-        </button>
-      </form>
-
-      <div class="mt-6 text-center">
-        <p class="text-sm text-gray-600">
-          Don't have an account?
-          <button type="button" id="switch-to-register" class="font-medium text-primary-600 hover:text-primary-500">
-            Sign up now
-          </button>
-        </p>
-      </div>
-    `
-  }
-
-  getRegisterFormHTML() {
-    return `
-      <!-- Social Login Buttons -->
-      <div class="space-y-3 mb-6">
-        <button type="button" id="google-signin-btn"
-                class="w-full flex justify-center items-center px-4 py-3 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition">
-          <svg class="w-5 h-5 mr-3" viewBox="0 0 24 24">
-            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-          </svg>
-          Continue with Google
-        </button>
-
-        <button type="button" id="facebook-signin-btn"
-                class="w-full flex justify-center items-center px-4 py-3 border border-gray-300 rounded-md shadow-sm bg-blue-600 text-sm font-medium text-white hover:bg-blue-700 transition">
-          <i class="fab fa-facebook-f mr-3"></i>
-          Continue with Facebook
-        </button>
-      </div>
-
-      <!-- Divider -->
-      <div class="relative mb-6">
-        <div class="absolute inset-0 flex items-center">
-          <div class="w-full border-t border-gray-300"></div>
-        </div>
-        <div class="relative flex justify-center text-sm">
-          <span class="px-2 bg-white text-gray-500">Or create account with email</span>
-        </div>
-      </div>
-
-      <!-- Email Register Form -->
-      <form id="email-register-form" class="space-y-6">
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label for="register-firstname" class="block text-sm font-medium text-gray-700 mb-2">First Name</label>
-            <input type="text" id="register-firstname" name="firstname" required
-                   class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                   placeholder="First name">
-          </div>
-          <div>
-            <label for="register-lastname" class="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
-            <input type="text" id="register-lastname" name="lastname" required
-                   class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                   placeholder="Last name">
-          </div>
-        </div>
-        
-        <div>
-          <label for="register-email" class="block text-sm font-medium text-gray-700 mb-2">Email</label>
-          <input type="email" id="register-email" name="email" required
-                 class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                 placeholder="Enter your email">
-        </div>
-        
-        <div>
-          <label for="register-password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
-          <input type="password" id="register-password" name="password" required
-                 class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                 placeholder="Create a password">
-        </div>
-        
-        <div>
-          <label for="register-confirm-password" class="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
-          <input type="password" id="register-confirm-password" name="confirm-password" required
-                 class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                 placeholder="Confirm your password">
-        </div>
-        
-        <div class="flex items-center">
-          <input id="terms-checkbox" name="terms" type="checkbox" required class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded">
-          <label for="terms-checkbox" class="ml-2 block text-sm text-gray-700">
-            I agree to the <a href="#" class="text-primary-600 hover:text-primary-500">Terms and Conditions</a>
-          </label>
-        </div>
-        
-        <button type="submit" class="w-full bg-primary-600 hover:bg-primary-700 text-white px-4 py-3 rounded-md transition font-medium">
-          Create Account
-        </button>
-      </form>
-
-      <div class="mt-6 text-center">
-        <p class="text-sm text-gray-600">
-          Already have an account?
-          <button type="button" id="switch-to-login" class="font-medium text-primary-600 hover:text-primary-500">
-            Sign in here
-          </button>
-        </p>
-      </div>
-    `
-  }
-
-  setupAuthFormListeners(type) {
-    // Social login buttons
-    document.getElementById("google-signin-btn")?.addEventListener("click", this.handleGoogleSignIn.bind(this))
-    document.getElementById("facebook-signin-btn")?.addEventListener("click", this.handleFacebookSignIn.bind(this))
-
-    // Form switches
-    document.getElementById("switch-to-register")?.addEventListener("click", () => this.showAuthModal("register"))
-    document.getElementById("switch-to-login")?.addEventListener("click", () => this.showAuthModal("login"))
-
-    // Email forms
-    if (type === "login") {
-      document.getElementById("email-login-form")?.addEventListener("submit", this.handleEmailLogin.bind(this))
-      document.getElementById("forgot-password-btn")?.addEventListener("click", this.handleForgotPassword.bind(this))
-    } else {
-      document.getElementById("email-register-form")?.addEventListener("submit", this.handleEmailRegister.bind(this))
-    }
-  }
-
-  async handleGoogleSignIn() {
-    try {
-      if (!window.firebaseAuth) {
-        this.showNotification("Error", "Firebase not initialized", "error")
-        return
-      }
-
-      const result = await window.firebaseAuth.signInWithGoogle()
-      if (result.success) {
-        this.hideAuthModal()
-        this.showNotification("Success", "Signed in successfully!", "success")
-      } else {
-        this.showNotification("Error", result.error, "error")
-      }
-    } catch (error) {
-      this.showNotification("Error", "Failed to sign in with Google", "error")
-    }
-  }
-
-  async handleFacebookSignIn() {
-    try {
-      if (!window.firebaseAuth) {
-        this.showNotification("Error", "Firebase not initialized", "error")
-        return
-      }
-
-      const result = await window.firebaseAuth.signInWithFacebook()
-      if (result.success) {
-        this.hideAuthModal()
-        this.showNotification("Success", "Signed in successfully!", "success")
-      } else {
-        this.showNotification("Error", result.error, "error")
-      }
-    } catch (error) {
-      this.showNotification("Error", "Failed to sign in with Facebook", "error")
-    }
-  }
-
-  async handleEmailLogin(e) {
-    e.preventDefault()
-
-    const formData = new FormData(e.target)
-    const email = formData.get("email")
-    const password = formData.get("password")
-
-    try {
-      if (!window.firebaseAuth) {
-        this.showNotification("Error", "Firebase not initialized", "error")
-        return
-      }
-
-      const result = await window.firebaseAuth.signInWithEmail(email, password)
-      if (result.success) {
-        this.hideAuthModal()
-        this.showNotification("Success", "Signed in successfully!", "success")
-      } else {
-        this.showNotification("Error", result.error, "error")
-      }
-    } catch (error) {
-      this.showNotification("Error", "Failed to sign in", "error")
-    }
-  }
-
-  async handleEmailRegister(e) {
-    e.preventDefault()
-
-    const formData = new FormData(e.target)
-    const firstname = formData.get("firstname")
-    const lastname = formData.get("lastname")
-    const email = formData.get("email")
-    const password = formData.get("password")
-    const confirmPassword = formData.get("confirm-password")
-
-    if (password !== confirmPassword) {
-      this.showNotification("Error", "Passwords do not match", "error")
-      return
-    }
-
-    if (password.length < 6) {
-      this.showNotification("Error", "Password must be at least 6 characters long", "error")
-      return
-    }
-
-    try {
-      if (!window.firebaseAuth) {
-        this.showNotification("Error", "Firebase not initialized", "error")
-        return
-      }
-
-      const result = await window.firebaseAuth.signUpWithEmail(email, password, {
-        fullName: `${firstname} ${lastname}`,
-        username: email.split("@")[0],
-      })
-
-      if (result.success) {
-        this.hideAuthModal()
-        this.showNotification("Success", "Account created successfully!", "success")
-      } else {
-        this.showNotification("Error", result.error, "error")
-      }
-    } catch (error) {
-      this.showNotification("Error", "Failed to create account", "error")
-    }
-  }
-
-  async handleForgotPassword() {
-    const email = prompt("Enter your email address:")
-    if (!email) return
-
-    try {
-      if (!window.firebaseAuth) {
-        this.showNotification("Error", "Firebase not initialized", "error")
-        return
-      }
-
-      const result = await window.firebaseAuth.resetPassword(email)
-      if (result.success) {
-        this.showNotification("Success", "Password reset email sent!", "success")
-      } else {
-        this.showNotification("Error", result.error, "error")
-      }
-    } catch (error) {
-      this.showNotification("Error", "Failed to send reset email", "error")
-    }
-  }
-
-  async handleLogout() {
-    try {
-      if (!window.firebaseAuth) {
-        this.showNotification("Error", "Firebase not initialized", "error")
-        return
-      }
-
-      const result = await window.firebaseAuth.signOut()
-      if (result.success) {
-        this.showNotification("Success", "Signed out successfully", "success")
-      }
-    } catch (error) {
-      this.showNotification("Error", "Failed to sign out", "error")
-    }
-  }
-
-  toggleMobileMenu() {
-    const mobileMenu = document.getElementById("mobile-menu")
-    if (mobileMenu) {
-      mobileMenu.classList.toggle("hidden")
-    }
-  }
-
-  toggleUserMenu() {
-    const dropdown = document.getElementById("user-dropdown")
-    if (dropdown) {
-      dropdown.classList.toggle("hidden")
-    }
-  }
-
-  setDefaultDates() {
-    const today = new Date()
-    const tomorrow = new Date(today)
-    tomorrow.setDate(tomorrow.getDate() + 1)
-    const dayAfter = new Date(today)
-    dayAfter.setDate(dayAfter.getDate() + 3)
-
-    const pickupDate = document.getElementById("pickup_date")
-    const returnDate = document.getElementById("return_date")
-
-    if (pickupDate) pickupDate.value = tomorrow.toISOString().split("T")[0]
-    if (returnDate) returnDate.value = dayAfter.toISOString().split("T")[0]
-  }
-
-  updateStats() {
-    // Update hero stats
-    const statsVehicles = document.getElementById("stats-vehicles")
-
-    if (statsVehicles) {
-      statsVehicles.textContent = `${this.vehicles.length}+`
-    }
-  }
-
-  hideLoadingScreen() {
-    const loadingScreen = document.getElementById("loading-screen")
-    if (loadingScreen) {
+      loadingScreen.style.opacity = "0"
       setTimeout(() => {
-        loadingScreen.style.opacity = "0"
-        setTimeout(() => {
-          loadingScreen.style.display = "none"
-        }, 300)
-      }, 1500)
+        loadingScreen.style.display = "none"
+      }, 500)
     }
-  }
+  }, 2000)
 
-  showNotification(title, message, type = "success") {
-    const toast = document.getElementById("notification-toast")
-    const toastIcon = document.getElementById("toast-icon")
-    const toastTitle = document.getElementById("toast-title")
-    const toastMessage = document.getElementById("toast-message")
+  // Initialize the application
+  initializeApp()
+})
 
-    if (!toast || !toastIcon || !toastTitle || !toastMessage) return
+// Initialize application
+async function initializeApp() {
+  try {
+    console.log("Initializing VehicleRent Pro...")
 
-    // Set content
-    toastTitle.textContent = title
-    toastMessage.textContent = message
+    // Wait for Firebase Auth to initialize
+    await firebaseAuth.initialize()
 
-    // Set icon and colors based on type
-    const iconClasses = {
-      success: { icon: "fas fa-check", bg: "bg-green-500" },
-      error: { icon: "fas fa-times", bg: "bg-red-500" },
-      warning: { icon: "fas fa-exclamation-triangle", bg: "bg-yellow-500" },
-      info: { icon: "fas fa-info", bg: "bg-blue-500" },
-    }
+    // Setup event listeners
+    setupEventListeners()
 
-    const config = iconClasses[type] || iconClasses.success
-    toastIcon.className = `w-8 h-8 rounded-full flex items-center justify-center mr-3 ${config.bg}`
-    toastIcon.innerHTML = `<i class="${config.icon} text-white"></i>`
+    // Initialize sample data if needed
+    await initializeSampleData()
 
-    // Show toast
-    toast.classList.remove("translate-x-full")
-    toast.classList.add("translate-x-0")
-
-    // Auto hide after 5 seconds
-    setTimeout(() => {
-      this.hideNotification()
-    }, 5000)
-  }
-
-  hideNotification() {
-    const toast = document.getElementById("notification-toast")
-    if (toast) {
-      toast.classList.remove("translate-x-0")
-      toast.classList.add("translate-x-full")
-    }
+    console.log("Application initialized successfully")
+  } catch (error) {
+    console.error("Error initializing application:", error)
+    showNotification("Error initializing application. Please refresh the page.", "error")
   }
 }
 
-// Initialize app when DOM is loaded
-document.addEventListener("DOMContentLoaded", () => {
-  // Initialize AOS animation library if available
-  if (typeof AOS !== "undefined") {
-    AOS.init({
-      duration: 800,
-      easing: "ease-in-out",
-      once: true,
-    })
-  }
-
-  // Initialize the app
-  window.app = new VehicleRentalApp()
-
-  // Handle mobile menu toggle
+// Setup event listeners
+function setupEventListeners() {
+  // Mobile menu toggle
   const mobileMenuBtn = document.getElementById("mobile-menu-btn")
   const mobileMenu = document.getElementById("mobile-menu")
 
@@ -915,193 +58,531 @@ document.addEventListener("DOMContentLoaded", () => {
     })
   }
 
-  // Handle user menu toggle
+  // User menu toggle
   const userMenuBtn = document.getElementById("user-menu-btn")
   const userDropdown = document.getElementById("user-dropdown")
 
   if (userMenuBtn && userDropdown) {
-    userMenuBtn.addEventListener("click", () => {
+    userMenuBtn.addEventListener("click", (e) => {
+      e.stopPropagation()
       userDropdown.classList.toggle("hidden")
     })
 
     // Close dropdown when clicking outside
-    document.addEventListener("click", (event) => {
-      if (!userMenuBtn.contains(event.target) && !userDropdown.contains(event.target)) {
-        userDropdown.classList.add("hidden")
-      }
+    document.addEventListener("click", () => {
+      userDropdown.classList.add("hidden")
     })
   }
 
-  // Initialize sample data if Firebase is available
-  if (typeof firebase !== "undefined") {
-    initializeSampleData()
-  }
-})
+  // Auth buttons
+  const loginBtn = document.getElementById("login-btn")
+  const registerBtn = document.getElementById("register-btn")
+  const logoutBtn = document.getElementById("logout-btn")
 
-// Initialize sample data function
+  if (loginBtn) {
+    loginBtn.addEventListener("click", showLoginModal)
+  }
+
+  if (registerBtn) {
+    registerBtn.addEventListener("click", showRegisterModal)
+  }
+
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", handleLogout)
+  }
+
+  // Dashboard links
+  const dashboardLink = document.getElementById("dashboard-link")
+  if (dashboardLink) {
+    dashboardLink.addEventListener("click", (e) => {
+      e.preventDefault()
+      redirectToDashboard()
+    })
+  }
+
+  // Smooth scrolling for navigation links
+  document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+    anchor.addEventListener("click", function (e) {
+      e.preventDefault()
+      const target = document.querySelector(this.getAttribute("href"))
+      if (target) {
+        target.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        })
+      }
+    })
+  })
+}
+
+// Show login modal
+function showLoginModal() {
+  const modal = createAuthModal("login")
+  document.body.appendChild(modal)
+}
+
+// Show register modal
+function showRegisterModal() {
+  const modal = createAuthModal("register")
+  document.body.appendChild(modal)
+}
+
+// Create authentication modal
+function createAuthModal(type) {
+  const modal = document.createElement("div")
+  modal.className = "fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+  modal.id = "auth-modal"
+
+  const isLogin = type === "login"
+  const title = isLogin ? "Sign In" : "Create Account"
+  const switchText = isLogin ? "Don't have an account?" : "Already have an account?"
+  const switchAction = isLogin ? "Sign Up" : "Sign In"
+
+  modal.innerHTML = `
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">${title}</h2>
+                <button id="close-modal" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+
+            <form id="auth-form" class="space-y-4">
+                ${
+                  !isLogin
+                    ? `
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                        <input type="text" id="fullName" required 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                    </div>
+                `
+                    : ""
+                }
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <input type="email" id="email" required 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                    <input type="password" id="password" required 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                </div>
+
+                ${
+                  !isLogin
+                    ? `
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Phone (Optional)</label>
+                        <input type="tel" id="phone" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                    </div>
+                `
+                    : ""
+                }
+
+                <button type="submit" id="auth-submit" 
+                        class="w-full bg-primary-600 text-white py-2 px-4 rounded-lg hover:bg-primary-700 transition">
+                    ${title}
+                </button>
+            </form>
+
+            <div class="mt-6">
+                <div class="relative">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-gray-300"></div>
+                    </div>
+                    <div class="relative flex justify-center text-sm">
+                        <span class="px-2 bg-white text-gray-500">Or continue with</span>
+                    </div>
+                </div>
+
+                <div class="mt-4 grid grid-cols-2 gap-3">
+                    <button id="google-signin" 
+                            class="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+                        <i class="fab fa-google text-red-500 mr-2"></i>
+                        Google
+                    </button>
+                    <button id="facebook-signin" 
+                            class="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+                        <i class="fab fa-facebook text-blue-600 mr-2"></i>
+                        Facebook
+                    </button>
+                </div>
+            </div>
+
+            <div class="mt-6 text-center">
+                <p class="text-sm text-gray-600">
+                    ${switchText}
+                    <button id="switch-auth" class="text-primary-600 hover:text-primary-700 font-medium">
+                        ${switchAction}
+                    </button>
+                </p>
+                ${
+                  isLogin
+                    ? `
+                    <button id="forgot-password" class="text-sm text-primary-600 hover:text-primary-700 mt-2">
+                        Forgot your password?
+                    </button>
+                `
+                    : ""
+                }
+            </div>
+        </div>
+    `
+
+  // Setup modal event listeners
+  setupModalEventListeners(modal, type)
+
+  return modal
+}
+
+// Setup modal event listeners
+function setupModalEventListeners(modal, type) {
+  const closeBtn = modal.querySelector("#close-modal")
+  const authForm = modal.querySelector("#auth-form")
+  const googleBtn = modal.querySelector("#google-signin")
+  const facebookBtn = modal.querySelector("#facebook-signin")
+  const switchBtn = modal.querySelector("#switch-auth")
+  const forgotBtn = modal.querySelector("#forgot-password")
+
+  // Close modal
+  closeBtn.addEventListener("click", () => {
+    modal.remove()
+  })
+
+  // Close modal when clicking outside
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) {
+      modal.remove()
+    }
+  })
+
+  // Form submission
+  authForm.addEventListener("submit", async (e) => {
+    e.preventDefault()
+    await handleAuthSubmit(type, modal)
+  })
+
+  // Social sign-in
+  googleBtn.addEventListener("click", () => handleSocialSignIn("google", modal))
+  facebookBtn.addEventListener("click", () => handleSocialSignIn("facebook", modal))
+
+  // Switch between login/register
+  switchBtn.addEventListener("click", () => {
+    modal.remove()
+    const newType = type === "login" ? "register" : "login"
+    const newModal = createAuthModal(newType)
+    document.body.appendChild(newModal)
+  })
+
+  // Forgot password
+  if (forgotBtn) {
+    forgotBtn.addEventListener("click", () => handleForgotPassword(modal))
+  }
+}
+
+// Handle authentication form submission
+async function handleAuthSubmit(type, modal) {
+  const submitBtn = modal.querySelector("#auth-submit")
+  const originalText = submitBtn.textContent
+
+  try {
+    submitBtn.textContent = "Processing..."
+    submitBtn.disabled = true
+
+    const email = modal.querySelector("#email").value
+    const password = modal.querySelector("#password").value
+
+    let result
+
+    if (type === "login") {
+      result = await firebaseAuth.signInWithEmail(email, password)
+    } else {
+      const fullName = modal.querySelector("#fullName").value
+      const phone = modal.querySelector("#phone").value
+
+      result = await firebaseAuth.signUpWithEmail(email, password, {
+        fullName,
+        phone,
+        username: email.split("@")[0],
+      })
+    }
+
+    if (result.success) {
+      showNotification(`${type === "login" ? "Signed in" : "Account created"} successfully!`, "success")
+      modal.remove()
+    } else {
+      showNotification(result.error, "error")
+    }
+  } catch (error) {
+    console.error("Auth error:", error)
+    showNotification("An unexpected error occurred. Please try again.", "error")
+  } finally {
+    submitBtn.textContent = originalText
+    submitBtn.disabled = false
+  }
+}
+
+// Handle social sign-in
+async function handleSocialSignIn(provider, modal) {
+  try {
+    let result
+
+    if (provider === "google") {
+      result = await firebaseAuth.signInWithGoogle()
+    } else if (provider === "facebook") {
+      result = await firebaseAuth.signInWithFacebook()
+    }
+
+    if (result.success) {
+      showNotification(`Signed in with ${provider} successfully!`, "success")
+      modal.remove()
+    } else {
+      showNotification(result.error, "error")
+    }
+  } catch (error) {
+    console.error("Social sign-in error:", error)
+    showNotification("Social sign-in failed. Please try again.", "error")
+  }
+}
+
+// Handle forgot password
+async function handleForgotPassword(modal) {
+  const email = modal.querySelector("#email").value
+
+  if (!email) {
+    showNotification("Please enter your email address first.", "warning")
+    return
+  }
+
+  try {
+    const result = await firebaseAuth.resetPassword(email)
+
+    if (result.success) {
+      showNotification("Password reset email sent! Check your inbox.", "success")
+      modal.remove()
+    } else {
+      showNotification(result.error, "error")
+    }
+  } catch (error) {
+    console.error("Password reset error:", error)
+    showNotification("Failed to send password reset email.", "error")
+  }
+}
+
+// Handle logout
+async function handleLogout() {
+  try {
+    const result = await firebaseAuth.signOut()
+
+    if (result.success) {
+      showNotification("Signed out successfully!", "success")
+    } else {
+      showNotification("Error signing out. Please try again.", "error")
+    }
+  } catch (error) {
+    console.error("Logout error:", error)
+    showNotification("Error signing out. Please try again.", "error")
+  }
+}
+
+// Redirect to dashboard based on user role
+async function redirectToDashboard() {
+  try {
+    const isAdmin = await firebaseAuth.isAdmin()
+
+    if (isAdmin) {
+      window.location.href = "admin/dashboard.html"
+    } else {
+      // For now, show a message since customer dashboard isn't implemented
+      showNotification("Customer dashboard coming soon!", "info")
+    }
+  } catch (error) {
+    console.error("Error redirecting to dashboard:", error)
+    showNotification("Error accessing dashboard. Please try again.", "error")
+  }
+}
+
+// Initialize sample data
 async function initializeSampleData() {
   try {
-    if (!window.firebaseDB) return
+    // Check if sample data already exists
+    const categoriesResult = await firebaseDB.getCategories()
 
-    // Check if categories exist
-    const categoriesResult = await window.firebaseDB.getCategories()
+    if (categoriesResult.success && categoriesResult.categories.length === 0) {
+      console.log("Initializing sample data...")
 
-    if (!categoriesResult.success || categoriesResult.categories.length === 0) {
       // Create sample categories
-      const categories = [
+      const sampleCategories = [
         {
-          name: "Economy",
-          description: "Fuel-efficient and budget-friendly vehicles perfect for city driving",
+          name: "Economy Cars",
+          description: "Affordable and fuel-efficient vehicles",
           icon: "fas fa-car",
           sortOrder: 1,
         },
         {
-          name: "Compact",
-          description: "Small cars ideal for urban environments and short trips",
-          icon: "fas fa-car-side",
+          name: "Luxury Cars",
+          description: "Premium vehicles with advanced features",
+          icon: "fas fa-gem",
           sortOrder: 2,
         },
         {
-          name: "Mid-size",
-          description: "Comfortable vehicles perfect for longer journeys and family trips",
-          icon: "fas fa-car-alt",
+          name: "SUVs",
+          description: "Spacious sport utility vehicles",
+          icon: "fas fa-truck",
           sortOrder: 3,
         },
         {
-          name: "SUV",
-          description: "Spacious vehicles ideal for families, groups, and outdoor adventures",
-          icon: "fas fa-truck",
+          name: "Vans",
+          description: "Large capacity vehicles for groups",
+          icon: "fas fa-shuttle-van",
           sortOrder: 4,
-        },
-        {
-          name: "Luxury",
-          description: "Premium vehicles with high-end features and superior comfort",
-          icon: "fas fa-gem",
-          sortOrder: 5,
-        },
-        {
-          name: "Electric",
-          description: "Eco-friendly electric vehicles for sustainable transportation",
-          icon: "fas fa-leaf",
-          sortOrder: 6,
         },
       ]
 
-      for (const category of categories) {
-        await window.firebaseDB.createCategory(category)
+      for (const category of sampleCategories) {
+        await firebaseDB.createCategory(category)
       }
 
-      console.log("Sample categories created")
-    }
+      // Create sample vehicles
+      const categories = await firebaseDB.getCategories()
+      if (categories.success && categories.categories.length > 0) {
+        const economyCategory = categories.categories.find((c) => c.name === "Economy Cars")
+        const luxuryCategory = categories.categories.find((c) => c.name === "Luxury Cars")
 
-    // Check if vehicles exist
-    const vehiclesResult = await window.firebaseDB.getVehicles()
-
-    if (!vehiclesResult.success || vehiclesResult.vehicles.length === 0) {
-      // Get categories for vehicle creation
-      const updatedCategoriesResult = await window.firebaseDB.getCategories()
-
-      if (updatedCategoriesResult.success) {
-        const categories = updatedCategoriesResult.categories
-        const categoryMap = {}
-        categories.forEach((cat) => {
-          categoryMap[cat.name.toLowerCase()] = cat.id
-        })
-
-        // Create sample vehicles
         const sampleVehicles = [
           {
-            categoryId: categoryMap["economy"],
+            categoryId: economyCategory?.id,
             make: "Toyota",
             model: "Corolla",
             year: 2023,
-            licensePlate: "ECO001",
+            licensePlate: "ABC-123",
             color: "White",
             seats: 5,
             fuelType: "petrol",
             transmission: "automatic",
-            dailyRate: 45.0,
-            features: "Air Conditioning, Bluetooth, USB Charging, Backup Camera, Fuel Efficient",
-            mileage: 15000,
-            imageUrl:
-              "https://images.unsplash.com/photo-1549924231-f129b911e442?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
+            dailyRate: 45,
+            features: "Air Conditioning, Bluetooth, Backup Camera",
+            imageUrl: "/placeholder.svg?height=300&width=400",
           },
           {
-            categoryId: categoryMap["suv"],
-            make: "Toyota",
-            model: "RAV4",
-            year: 2023,
-            licensePlate: "SUV001",
-            color: "Red",
-            seats: 7,
-            fuelType: "hybrid",
-            transmission: "automatic",
-            dailyRate: 80.0,
-            features: "AWD, Heated Seats, Apple CarPlay, Safety Suite, Hybrid Engine",
-            mileage: 5000,
-            imageUrl:
-              "https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-          },
-          {
-            categoryId: categoryMap["luxury"],
+            categoryId: luxuryCategory?.id,
             make: "BMW",
             model: "3 Series",
             year: 2023,
-            licensePlate: "LUX001",
+            licensePlate: "XYZ-789",
             color: "Black",
             seats: 5,
             fuelType: "petrol",
             transmission: "automatic",
-            dailyRate: 120.0,
-            features: "Leather Interior, Premium Sound, Navigation, Sport Package, Luxury Features",
-            mileage: 3000,
-            imageUrl:
-              "https://images.unsplash.com/photo-1555215695-3004980ad54e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
+            dailyRate: 120,
+            features: "Leather Seats, Navigation, Premium Sound",
+            imageUrl: "/placeholder.svg?height=300&width=400",
           },
         ]
 
         for (const vehicle of sampleVehicles) {
-          if (vehicle.categoryId) {
-            await window.firebaseDB.createVehicle(vehicle)
-          }
+          await firebaseDB.createVehicle(vehicle)
         }
-
-        console.log("Sample vehicles created")
       }
-    }
 
-    // Initialize system settings
-    await window.firebaseDB.setSetting("site_name", "VehicleRent Pro", "Website name", "general")
-    await window.firebaseDB.setSetting("currency", "USD", "Default currency", "financial")
-    await window.firebaseDB.setSetting("tax_rate", "0.08", "Default tax rate (8%)", "financial")
+      console.log("Sample data initialized successfully")
+    }
   } catch (error) {
     console.error("Error initializing sample data:", error)
   }
 }
 
-// Add CSS animations
-const style = document.createElement("style")
-style.textContent = `
-  @keyframes blob {
-    0% { transform: translate(0px, 0px) scale(1); }
-    33% { transform: translate(30px, -50px) scale(1.1); }
-    66% { transform: translate(-20px, 20px) scale(0.9); }
-    100% { transform: translate(0px, 0px) scale(1); }
+// Show notification
+function showNotification(message, type = "info") {
+  // Remove existing notifications
+  const existingNotifications = document.querySelectorAll(".notification")
+  existingNotifications.forEach((notification) => notification.remove())
+
+  const notification = document.createElement("div")
+  notification.className = `notification fixed top-4 right-4 z-50 px-6 py-4 rounded-lg shadow-lg transform translate-x-full transition-transform duration-300`
+
+  const colors = {
+    success: "bg-green-500 text-white",
+    error: "bg-red-500 text-white",
+    warning: "bg-yellow-500 text-white",
+    info: "bg-blue-500 text-white",
   }
-  .animate-blob {
-    animation: blob 7s infinite;
+
+  const icons = {
+    success: "fas fa-check-circle",
+    error: "fas fa-exclamation-circle",
+    warning: "fas fa-exclamation-triangle",
+    info: "fas fa-info-circle",
   }
-  .animation-delay-2000 {
-    animation-delay: 2s;
-  }
-  .animation-delay-4000 {
-    animation-delay: 4s;
-  }
-  .shadow-card {
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  }
-  .shadow-card-hover {
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  }
-`
-document.head.appendChild(style)
+
+  notification.className += ` ${colors[type] || colors.info}`
+  notification.innerHTML = `
+        <div class="flex items-center">
+            <i class="${icons[type] || icons.info} mr-3"></i>
+            <span>${message}</span>
+            <button class="ml-4 text-white hover:text-gray-200" onclick="this.parentElement.parentElement.remove()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    `
+
+  document.body.appendChild(notification)
+
+  // Animate in
+  setTimeout(() => {
+    notification.style.transform = "translateX(0)"
+  }, 100)
+
+  // Auto remove after 5 seconds
+  setTimeout(() => {
+    notification.style.transform = "translateX(full)"
+    setTimeout(() => {
+      if (notification.parentNode) {
+        notification.remove()
+      }
+    }, 300)
+  }, 5000)
+}
+
+// Utility functions
+function formatCurrency(amount, currency = "USD") {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: currency,
+  }).format(amount)
+}
+
+function formatDate(date) {
+  return new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  }).format(new Date(date))
+}
+
+function formatDateTime(date) {
+  return new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(date))
+}
+
+// Export functions for use in other modules
+window.VehicleRentPro = {
+  firebaseAuth,
+  firebaseDB,
+  showNotification,
+  formatCurrency,
+  formatDate,
+  formatDateTime,
+}
+
+console.log("VehicleRent Pro main.js loaded successfully")
