@@ -25,11 +25,10 @@ import {
   orderBy,
   limit,
   serverTimestamp,
-  increment,
-  onSnapshot,
+  enableIndexedDbPersistence,
 } from "firebase/firestore"
-import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage"
-import { getAnalytics } from "firebase/analytics"
+import { getStorage } from "firebase/storage"
+import { getAnalytics, isSupported } from "firebase/analytics"
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -42,17 +41,44 @@ const firebaseConfig = {
 }
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig)
+let app, auth, db, storage, analytics
 
-// Initialize Firebase services
-export const auth = getAuth(app)
-export const db = getFirestore(app)
-export const storage = getStorage(app)
-export const analytics = getAnalytics(app)
+try {
+  app = initializeApp(firebaseConfig)
+
+  // Initialize Firebase services
+  auth = getAuth(app)
+  db = getFirestore(app)
+  storage = getStorage(app)
+
+  // Initialize analytics only if supported (won't run in environments without browser support)
+  isSupported()
+    .then((supported) => {
+      if (supported) {
+        analytics = getAnalytics(app)
+      }
+    })
+    .catch((err) => {
+      console.warn("Analytics not supported:", err)
+    })
+
+  // Enable offline persistence for Firestore
+  enableIndexedDbPersistence(db).catch((err) => {
+    if (err.code === "failed-precondition") {
+      console.warn("Firestore persistence failed: Multiple tabs open")
+    } else if (err.code === "unimplemented") {
+      console.warn("Firestore persistence not available in this browser")
+    }
+  })
+
+  console.log("Firebase initialized successfully")
+} catch (error) {
+  console.error("Firebase initialization error:", error)
+}
 
 // Initialize providers
-export const googleProvider = new GoogleAuthProvider()
-export const facebookProvider = new FacebookAuthProvider()
+const googleProvider = new GoogleAuthProvider()
+const facebookProvider = new FacebookAuthProvider()
 
 // Configure providers
 googleProvider.setCustomParameters({
@@ -64,7 +90,7 @@ facebookProvider.setCustomParameters({
 })
 
 // Firebase Database Manager
-export class FirebaseDBManager {
+class FirebaseDBManager {
   constructor() {
     this.collections = {
       users: "users",
@@ -97,6 +123,8 @@ export class FirebaseDBManager {
   // Users Management
   async createUser(userData) {
     try {
+      if (!db) throw new Error("Firestore not initialized")
+
       const userRef = doc(db, this.collections.users, userData.uid)
       const user = {
         uid: userData.uid,
@@ -137,6 +165,8 @@ export class FirebaseDBManager {
 
   async getUser(uid) {
     try {
+      if (!db) throw new Error("Firestore not initialized")
+
       const userRef = doc(db, this.collections.users, uid)
       const userSnap = await getDoc(userRef)
 
@@ -153,6 +183,8 @@ export class FirebaseDBManager {
 
   async updateUser(uid, userData) {
     try {
+      if (!db) throw new Error("Firestore not initialized")
+
       const userRef = doc(db, this.collections.users, uid)
       const updateData = {
         ...userData,
@@ -170,6 +202,8 @@ export class FirebaseDBManager {
 
   async getAllUsers(role = null, limitCount = 50) {
     try {
+      if (!db) throw new Error("Firestore not initialized")
+
       let q = collection(db, this.collections.users)
 
       if (role) {
@@ -195,6 +229,8 @@ export class FirebaseDBManager {
   // Vehicle Categories Management
   async createCategory(categoryData) {
     try {
+      if (!db) throw new Error("Firestore not initialized")
+
       const categoryRef = doc(collection(db, this.collections.categories))
       const category = {
         id: categoryRef.id,
@@ -217,6 +253,8 @@ export class FirebaseDBManager {
 
   async getCategories() {
     try {
+      if (!db) throw new Error("Firestore not initialized")
+
       const q = query(
         collection(db, this.collections.categories),
         where("status", "==", "active"),
@@ -241,6 +279,8 @@ export class FirebaseDBManager {
   // Vehicles Management
   async createVehicle(vehicleData) {
     try {
+      if (!db) throw new Error("Firestore not initialized")
+
       const vehicleRef = doc(collection(db, this.collections.vehicles))
       const vehicle = {
         id: vehicleRef.id,
@@ -286,6 +326,8 @@ export class FirebaseDBManager {
 
   async getVehicles(status = null, categoryId = null, limitCount = 50) {
     try {
+      if (!db) throw new Error("Firestore not initialized")
+
       let q = collection(db, this.collections.vehicles)
       const conditions = []
 
@@ -319,6 +361,8 @@ export class FirebaseDBManager {
 
   async getVehicle(vehicleId) {
     try {
+      if (!db) throw new Error("Firestore not initialized")
+
       const vehicleRef = doc(db, this.collections.vehicles, vehicleId)
       const vehicleSnap = await getDoc(vehicleRef)
 
@@ -335,6 +379,8 @@ export class FirebaseDBManager {
 
   async updateVehicle(vehicleId, vehicleData) {
     try {
+      if (!db) throw new Error("Firestore not initialized")
+
       const vehicleRef = doc(db, this.collections.vehicles, vehicleId)
       const updateData = {
         ...vehicleData,
@@ -349,128 +395,11 @@ export class FirebaseDBManager {
     }
   }
 
-  // Bookings Management
-  async createBooking(bookingData) {
-    try {
-      const bookingRef = doc(collection(db, this.collections.bookings))
-      const booking = {
-        id: bookingRef.id,
-        bookingNumber: this.generateBookingNumber(),
-        customerId: bookingData.customerId,
-        vehicleId: bookingData.vehicleId,
-        startDate: bookingData.startDate,
-        endDate: bookingData.endDate,
-        startTime: bookingData.startTime || "09:00",
-        endTime: bookingData.endTime || "18:00",
-        pickupLocation: bookingData.pickupLocation,
-        returnLocation: bookingData.returnLocation,
-        totalDays: bookingData.totalDays,
-        dailyRate: bookingData.dailyRate,
-        subtotal: bookingData.subtotal,
-        taxAmount: bookingData.taxAmount || 0,
-        discountAmount: bookingData.discountAmount || 0,
-        totalAmount: bookingData.totalAmount,
-        depositAmount: bookingData.depositAmount || 0,
-        status: "pending",
-        paymentStatus: "pending",
-        bookingDate: serverTimestamp(),
-        confirmedAt: null,
-        startedAt: null,
-        completedAt: null,
-        cancelledAt: null,
-        cancellationReason: "",
-        notes: bookingData.notes || "",
-        specialRequests: bookingData.specialRequests || "",
-        customerInfo: bookingData.customerInfo || {},
-        vehicleInfo: bookingData.vehicleInfo || {},
-      }
-
-      await setDoc(bookingRef, booking)
-
-      // Update vehicle status
-      await this.updateVehicle(bookingData.vehicleId, { status: "rented" })
-
-      // Update user stats
-      await this.updateUserStats(bookingData.customerId, {
-        totalBookings: increment(1),
-        activeBookings: increment(1),
-      })
-
-      await this.logActivity(
-        bookingData.customerId,
-        "booking_created",
-        "booking",
-        bookingRef.id,
-        `Booking created: ${booking.bookingNumber}`,
-      )
-
-      return { success: true, booking }
-    } catch (error) {
-      console.error("Error creating booking:", error)
-      return { success: false, error: error.message }
-    }
-  }
-
-  async getBookings(customerId = null, status = null, limitCount = 50) {
-    try {
-      let q = collection(db, this.collections.bookings)
-      const conditions = []
-
-      if (customerId) {
-        conditions.push(where("customerId", "==", customerId))
-      }
-
-      if (status) {
-        conditions.push(where("status", "==", status))
-      }
-
-      if (conditions.length > 0) {
-        q = query(q, ...conditions)
-      }
-
-      q = query(q, orderBy("bookingDate", "desc"), limit(limitCount))
-
-      const querySnapshot = await getDocs(q)
-      const bookings = []
-
-      querySnapshot.forEach((doc) => {
-        bookings.push({ id: doc.id, ...doc.data() })
-      })
-
-      return { success: true, bookings }
-    } catch (error) {
-      console.error("Error getting bookings:", error)
-      return { success: false, error: error.message }
-    }
-  }
-
-  // File Upload Management
-  async uploadFile(file, path) {
-    try {
-      const storageRef = ref(storage, path)
-      const snapshot = await uploadBytes(storageRef, file)
-      const downloadURL = await getDownloadURL(snapshot.ref)
-      return { success: true, url: downloadURL, path: path }
-    } catch (error) {
-      console.error("Error uploading file:", error)
-      return { success: false, error: error.message }
-    }
-  }
-
-  async deleteFile(path) {
-    try {
-      const storageRef = ref(storage, path)
-      await deleteObject(storageRef)
-      return { success: true }
-    } catch (error) {
-      console.error("Error deleting file:", error)
-      return { success: false, error: error.message }
-    }
-  }
-
   // System Settings
   async getSetting(key, defaultValue = null) {
     try {
+      if (!db) throw new Error("Firestore not initialized")
+
       const settingRef = doc(db, this.collections.settings, key)
       const settingSnap = await getDoc(settingRef)
 
@@ -488,6 +417,8 @@ export class FirebaseDBManager {
 
   async setSetting(key, value, description = "", category = "general") {
     try {
+      if (!db) throw new Error("Firestore not initialized")
+
       const settingRef = doc(db, this.collections.settings, key)
       const setting = {
         key: key,
@@ -508,6 +439,8 @@ export class FirebaseDBManager {
   // Activity Logging
   async logActivity(userId, action, entityType = null, entityId = null, description = null) {
     try {
+      if (!db) throw new Error("Firestore not initialized")
+
       const activityRef = doc(collection(db, this.collections.activities))
       const activity = {
         id: activityRef.id,
@@ -526,28 +459,6 @@ export class FirebaseDBManager {
     } catch (error) {
       console.error("Error logging activity:", error)
       return { success: false }
-    }
-  }
-
-  // Real-time listeners
-  subscribeToCollection(collectionName, callback, conditions = []) {
-    try {
-      let q = collection(db, collectionName)
-
-      if (conditions.length > 0) {
-        q = query(q, ...conditions)
-      }
-
-      return onSnapshot(q, (snapshot) => {
-        const data = []
-        snapshot.forEach((doc) => {
-          data.push({ id: doc.id, ...doc.data() })
-        })
-        callback(data)
-      })
-    } catch (error) {
-      console.error("Error setting up real-time listener:", error)
-      return null
     }
   }
 
@@ -572,90 +483,27 @@ export class FirebaseDBManager {
       return "unknown"
     }
   }
-
-  async updateUserStats(userId, stats) {
-    try {
-      const userRef = doc(db, this.collections.users, userId)
-      const updateData = {}
-
-      for (const [key, value] of Object.entries(stats)) {
-        updateData[`stats.${key}`] = value
-      }
-
-      updateData.updatedAt = serverTimestamp()
-
-      await updateDoc(userRef, updateData)
-      return { success: true }
-    } catch (error) {
-      console.error("Error updating user stats:", error)
-      return { success: false }
-    }
-  }
-
-  // Dashboard Statistics
-  async getDashboardStats(userId = null, role = "customer") {
-    try {
-      let stats = {}
-
-      if (role === "admin") {
-        // Admin dashboard stats
-        const usersSnapshot = await getDocs(
-          query(collection(db, this.collections.users), where("role", "==", "customer")),
-        )
-        stats.totalCustomers = usersSnapshot.size
-
-        const vehiclesSnapshot = await getDocs(collection(db, this.collections.vehicles))
-        stats.totalVehicles = vehiclesSnapshot.size
-
-        const availableVehiclesSnapshot = await getDocs(
-          query(collection(db, this.collections.vehicles), where("status", "==", "available")),
-        )
-        stats.availableVehicles = availableVehiclesSnapshot.size
-
-        const activeBookingsSnapshot = await getDocs(
-          query(collection(db, this.collections.bookings), where("status", "==", "active")),
-        )
-        stats.activeBookings = activeBookingsSnapshot.size
-
-        // Calculate total revenue
-        const bookingsSnapshot = await getDocs(
-          query(collection(db, this.collections.bookings), where("status", "in", ["completed", "active"])),
-        )
-        let totalRevenue = 0
-        bookingsSnapshot.forEach((doc) => {
-          totalRevenue += doc.data().totalAmount || 0
-        })
-        stats.totalRevenue = totalRevenue
-
-        stats.fleetUtilization =
-          stats.totalVehicles > 0 ? ((stats.totalVehicles - stats.availableVehicles) / stats.totalVehicles) * 100 : 0
-      } else if (role === "customer" && userId) {
-        // Customer dashboard stats
-        const userResult = await this.getUser(userId)
-        if (userResult.success) {
-          stats = userResult.user.stats || {}
-        }
-      }
-
-      return { success: true, stats }
-    } catch (error) {
-      console.error("Error getting dashboard stats:", error)
-      return { success: false, error: error.message }
-    }
-  }
 }
 
 // Firebase Auth Manager
-export class FirebaseAuthManager {
+class FirebaseAuthManager {
   constructor() {
     this.currentUser = null
     this.dbManager = new FirebaseDBManager()
+    this.authInitialized = false
     this.initAuthStateListener()
   }
 
   initAuthStateListener() {
+    if (!auth) {
+      console.error("Auth not initialized")
+      return
+    }
+
     onAuthStateChanged(auth, async (user) => {
       this.currentUser = user
+      this.authInitialized = true
+
       if (user) {
         await this.handleUserSignIn(user)
       } else {
@@ -702,6 +550,8 @@ export class FirebaseAuthManager {
 
   async signUpWithEmail(email, password, userData) {
     try {
+      if (!auth) throw new Error("Auth not initialized")
+
       const userCredential = await createUserWithEmailAndPassword(auth, email, password)
       const user = userCredential.user
 
@@ -712,7 +562,7 @@ export class FirebaseAuthManager {
       await this.dbManager.createUser({
         uid: user.uid,
         email: user.email,
-        username: userData.username,
+        username: userData.username || email.split("@")[0],
         fullName: userData.fullName,
         phone: userData.phone || "",
         address: userData.address || "",
@@ -730,6 +580,8 @@ export class FirebaseAuthManager {
 
   async signInWithEmail(email, password) {
     try {
+      if (!auth) throw new Error("Auth not initialized")
+
       const userCredential = await signInWithEmailAndPassword(auth, email, password)
       return { success: true, user: userCredential.user }
     } catch (error) {
@@ -740,6 +592,8 @@ export class FirebaseAuthManager {
 
   async signInWithGoogle() {
     try {
+      if (!auth) throw new Error("Auth not initialized")
+
       const result = await signInWithPopup(auth, googleProvider)
       const user = result.user
       const isNewUser = result._tokenResponse?.isNewUser || false
@@ -764,6 +618,8 @@ export class FirebaseAuthManager {
 
   async signInWithFacebook() {
     try {
+      if (!auth) throw new Error("Auth not initialized")
+
       const result = await signInWithPopup(auth, facebookProvider)
       const user = result.user
       const isNewUser = result._tokenResponse?.isNewUser || false
@@ -788,6 +644,8 @@ export class FirebaseAuthManager {
 
   async signOut() {
     try {
+      if (!auth) throw new Error("Auth not initialized")
+
       await signOut(auth)
       return { success: true }
     } catch (error) {
@@ -798,6 +656,8 @@ export class FirebaseAuthManager {
 
   async resetPassword(email) {
     try {
+      if (!auth) throw new Error("Auth not initialized")
+
       await sendPasswordResetEmail(auth, email)
       return { success: true }
     } catch (error) {
@@ -814,7 +674,7 @@ export class FirebaseAuthManager {
     userMenu.forEach((menu) => {
       menu.style.display = "block"
       const userNameElement = menu.querySelector(".user-name")
-      const userAvatarElement = menu.querySelector(".user-avatar")
+      const userAvatarElement = menu.querySelector("#user-avatar")
 
       if (userNameElement) {
         userNameElement.textContent = user.displayName || user.email
@@ -888,15 +748,31 @@ export class FirebaseAuthManager {
   // Wait for auth state to be determined
   waitForAuth() {
     return new Promise((resolve) => {
-      if (this.currentUser !== null) {
+      if (this.authInitialized) {
         resolve(this.currentUser)
-      } else {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
-          this.currentUser = user
-          unsubscribe()
-          resolve(user)
-        })
+        return
       }
+
+      if (!auth) {
+        resolve(null)
+        return
+      }
+
+      const unsubscribe = onAuthStateChanged(auth, (user) => {
+        this.currentUser = user
+        this.authInitialized = true
+        unsubscribe()
+        resolve(user)
+      })
+
+      // Timeout after 10 seconds to prevent hanging
+      setTimeout(() => {
+        if (!this.authInitialized) {
+          console.warn("Auth initialization timed out")
+          this.authInitialized = true
+          resolve(null)
+        }
+      }, 10000)
     })
   }
 
@@ -914,9 +790,9 @@ export class FirebaseAuthManager {
 }
 
 // Initialize Firebase Auth Manager and DB Manager
-export const firebaseAuth = new FirebaseAuthManager()
-export const firebaseDB = new FirebaseDBManager()
+const firebaseAuth = new FirebaseAuthManager()
+const firebaseDB = new FirebaseDBManager()
 
 // Export Firebase app and services
-export { app }
+export { app, auth, db, storage, analytics, googleProvider, facebookProvider, firebaseAuth, firebaseDB }
 export default app
