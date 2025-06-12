@@ -3,245 +3,283 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VehicleRent Pro - Premium Vehicle Rental System</title>
+    <title>VehicleRent Pro Sri Lanka - Premium Vehicle Rentals</title>
     
-    <!-- Meta Tags -->
-    <meta name="description" content="Professional vehicle rental management system with Firebase integration">
-    <meta name="keywords" content="vehicle rental, car rental, firebase, booking system">
-    <meta name="author" content="VehicleRent Pro">
+    <meta name="description" content="Rent cars, vans, and SUVs across Sri Lanka. Best rates, easy booking, and reliable service with VehicleRent Pro.">
+    <meta name="keywords" content="vehicle rental sri lanka, car rental colombo, rent a car sri lanka, van rental sri lanka, suv rental sri lanka">
+    <meta name="author" content="VehicleRent Pro Sri Lanka">
     
-    <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
     
-    <!-- CSS Libraries -->
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     
-    <!-- Custom CSS -->
     <link href="assets/css/style.css" rel="stylesheet">
+    <style>
+        .hero-bg {
+            background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('/placeholder.svg?width=1200&height=800&text=Scenic+Sri+Lankan+Road');
+            background-size: cover;
+            background-position: center;
+        }
+        .feature-icon-bg {
+            background-color: var(--primary-100);
+            color: var(--primary-600);
+        }
+        .testimonial-card {
+            background-color: #f9fafb; /* Light gray for contrast */
+        }
+    </style>
 </head>
-<body class="bg-gray-50">
+<body class="bg-gray-100">
     <!-- Loading Screen -->
     <div id="loading-screen" class="fixed inset-0 bg-white z-50 flex items-center justify-center">
         <div class="text-center">
             <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-primary-600 mx-auto mb-4"></div>
             <h3 class="text-lg font-medium text-gray-900">Loading VehicleRent Pro...</h3>
-            <p class="text-sm text-gray-600 mt-2">Initializing Firebase services</p>
+            <p class="text-sm text-gray-600 mt-2">Initializing services for Sri Lanka</p>
         </div>
     </div>
 
     <!-- Navigation -->
-    <nav class="bg-white shadow-lg sticky top-0 z-40" id="main-nav">
+    <nav class="bg-white shadow-md sticky top-0 z-40" id="main-nav">
         <div class="container mx-auto px-4">
-            <div class="flex justify-between items-center py-4">
-                <!-- Logo -->
+            <div class="flex justify-between items-center py-3">
                 <div class="flex items-center">
                     <div class="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center mr-3">
-                        <i class="fas fa-car-side text-white text-xl"></i>
+                        <i class="fas fa-road text-white text-xl"></i>
                     </div>
                     <div>
                         <h1 class="text-xl font-bold text-gray-800">VehicleRent Pro</h1>
-                        <p class="text-xs text-gray-500">Premium Rental System</p>
+                        <p class="text-xs text-gray-500">Sri Lanka</p>
                     </div>
                 </div>
-
-                <!-- Desktop Navigation -->
-                <div class="hidden md:flex items-center space-x-8">
-                    <a href="#home" class="text-gray-700 hover:text-primary-600 transition">Home</a>
-                    <a href="#vehicles" class="text-gray-700 hover:text-primary-600 transition">Vehicles</a>
-                    <a href="#features" class="text-gray-700 hover:text-primary-600 transition">Features</a>
-                    <a href="#how-it-works" class="text-gray-700 hover:text-primary-600 transition">How It Works</a>
-                    <a href="#contact" class="text-gray-700 hover:text-primary-600 transition">Contact</a>
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="#home" class="text-gray-600 hover:text-primary-600 transition font-medium">Home</a>
+                    <a href="#services" class="text-gray-600 hover:text-primary-600 transition font-medium">Our Services</a>
+                    <a href="#vehicles" class="text-gray-600 hover:text-primary-600 transition font-medium">Vehicles</a>
+                    <a href="#why-us" class="text-gray-600 hover:text-primary-600 transition font-medium">Why Us</a>
+                    <a href="#contact" class="text-gray-600 hover:text-primary-600 transition font-medium">Contact</a>
                 </div>
-
-                <!-- Auth Buttons (shown when not logged in) -->
-                <div class="auth-buttons flex items-center space-x-4">
-                    <button id="login-btn" class="text-gray-700 hover:text-primary-600 transition">
-                        <i class="fas fa-sign-in-alt mr-2"></i>Login
+                <div class="auth-buttons flex items-center space-x-3">
+                    <button id="login-btn" class="text-gray-600 hover:text-primary-600 transition font-medium">
+                        <i class="fas fa-sign-in-alt mr-1"></i>Login
                     </button>
-                    <button id="register-btn" class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg transition">
-                        <i class="fas fa-user-plus mr-2"></i>Sign Up
+                    <button id="register-btn" class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-md transition font-semibold text-sm">
+                        <i class="fas fa-user-plus mr-1"></i>Sign Up
                     </button>
                 </div>
-
-                <!-- User Menu (shown when logged in) -->
                 <div class="user-menu hidden relative">
                     <button id="user-menu-btn" class="flex items-center space-x-3 text-gray-700 hover:text-primary-600 transition">
-                        <img id="user-avatar" src="https://via.placeholder.com/32" alt="User Avatar" class="w-8 h-8 rounded-full">
-                        <span id="user-name" class="user-name">User Name</span>
+                        <img id="user-avatar" src="/placeholder.svg?width=32&height=32&text=User" alt="User Avatar" class="w-8 h-8 rounded-full">
+                        <span id="user-name" class="user-name font-medium">User Name</span>
                         <i class="fas fa-chevron-down text-xs"></i>
                     </button>
-                    
-                    <!-- Dropdown Menu -->
-                    <div id="user-dropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border hidden">
-                        <div class="py-2">
-                            <a href="#" id="dashboard-link" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
-                            </a>
-                            <a href="#" id="profile-link" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                <i class="fas fa-user mr-2"></i>Profile
-                            </a>
-                            <a href="#" id="bookings-link" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                <i class="fas fa-calendar-alt mr-2"></i>My Bookings
-                            </a>
-                            <div class="border-t border-gray-100 my-1"></div>
-                            <button id="logout-btn" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                <i class="fas fa-sign-out-alt mr-2"></i>Logout
-                            </button>
-                        </div>
+                    <div id="user-dropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border hidden py-1">
+                        <a href="#" id="dashboard-link" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"><i class="fas fa-tachometer-alt mr-2"></i>Dashboard</a>
+                        <a href="#" id="profile-link" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"><i class="fas fa-user mr-2"></i>Profile</a>
+                        <a href="#" id="bookings-link" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"><i class="fas fa-calendar-alt mr-2"></i>My Bookings</a>
+                        <div class="border-t border-gray-100 my-1"></div>
+                        <button id="logout-btn" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"><i class="fas fa-sign-out-alt mr-2"></i>Logout</button>
                     </div>
                 </div>
-
-                <!-- Mobile Menu Button -->
-                <button id="mobile-menu-btn" class="md:hidden text-gray-700">
-                    <i class="fas fa-bars text-xl"></i>
-                </button>
+                <button id="mobile-menu-btn" class="md:hidden text-gray-700"><i class="fas fa-bars text-xl"></i></button>
             </div>
         </div>
-
-        <!-- Mobile Menu -->
-        <div id="mobile-menu" class="md:hidden bg-white border-t hidden">
-            <div class="px-4 py-2 space-y-2">
-                <a href="#home" class="block py-2 text-gray-700 hover:text-primary-600 transition">Home</a>
-                <a href="#vehicles" class="block py-2 text-gray-700 hover:text-primary-600 transition">Vehicles</a>
-                <a href="#features" class="block py-2 text-gray-700 hover:text-primary-600 transition">Features</a>
-                <a href="#how-it-works" class="block py-2 text-gray-700 hover:text-primary-600 transition">How It Works</a>
-                <a href="#contact" class="block py-2 text-gray-700 hover:text-primary-600 transition">Contact</a>
-            </div>
-        </div>
+        <div id="mobile-menu" class="md:hidden bg-white border-t hidden"><div class="px-4 py-2 space-y-2">
+            <a href="#home" class="block py-2 text-gray-700 hover:text-primary-600 transition">Home</a>
+            <a href="#services" class="block py-2 text-gray-700 hover:text-primary-600 transition">Our Services</a>
+            <a href="#vehicles" class="block py-2 text-gray-700 hover:text-primary-600 transition">Vehicles</a>
+            <a href="#why-us" class="block py-2 text-gray-700 hover:text-primary-600 transition">Why Us</a>
+            <a href="#contact" class="block py-2 text-gray-700 hover:text-primary-600 transition">Contact</a>
+        </div></div>
     </nav>
 
     <!-- Hero Section -->
-    <section id="home" class="bg-gradient-to-br from-primary-600 to-primary-800 text-white py-20">
+    <section id="home" class="hero-bg text-white py-24 md:py-32">
         <div class="container mx-auto px-4 text-center">
             <div data-aos="fade-up">
-                <h1 class="text-5xl md:text-6xl font-bold mb-6">
-                    Premium Vehicle Rental
-                    <span class="block text-primary-200">Management System</span>
-                </h1>
-                <p class="text-xl md:text-2xl mb-8 text-primary-100 max-w-3xl mx-auto">
-                    Experience the future of vehicle rental with our Firebase-powered platform. 
-                    Real-time booking, seamless management, and exceptional service.
+                <h1 class="text-4xl md:text-6xl font-bold mb-6 leading-tight">Explore Sri Lanka Your Way</h1>
+                <p class="text-lg md:text-xl mb-10 text-gray-200 max-w-2xl mx-auto">
+                    Reliable and affordable vehicle rentals for your adventures across the beautiful island of Sri Lanka.
                 </p>
-                <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                    <button class="bg-white text-primary-600 px-8 py-4 rounded-lg font-semibold hover:bg-primary-50 transition transform hover:scale-105">
-                        <i class="fas fa-car mr-2"></i>Browse Vehicles
-                    </button>
-                    <button class="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold hover:bg-white hover:text-primary-600 transition">
-                        <i class="fas fa-play mr-2"></i>Watch Demo
-                    </button>
+                <a href="#vehicles" class="bg-primary-600 hover:bg-primary-700 text-white px-10 py-4 rounded-lg font-semibold text-lg transition transform hover:scale-105 inline-block">
+                    <i class="fas fa-search mr-2"></i>Find Your Ride
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="services" class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12" data-aos="fade-up">
+                <h2 class="text-3xl font-bold text-gray-800 mb-3">Simple & Convenient Rentals</h2>
+                <p class="text-lg text-gray-600 max-w-xl mx-auto">Booking your perfect vehicle is just a few clicks away.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                <div data-aos="fade-up" data-aos-delay="100">
+                    <div class="w-20 h-20 feature-icon-bg rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-search-location text-3xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">1. Search & Select</h3>
+                    <p class="text-gray-600">Browse our wide range of vehicles and choose the one that fits your needs.</p>
+                </div>
+                <div data-aos="fade-up" data-aos-delay="200">
+                    <div class="w-20 h-20 feature-icon-bg rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-calendar-check text-3xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">2. Book & Confirm</h3>
+                    <p class="text-gray-600">Select your dates, provide details, and confirm your booking online.</p>
+                </div>
+                <div data-aos="fade-up" data-aos-delay="300">
+                    <div class="w-20 h-20 feature-icon-bg rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-car-side text-3xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">3. Pick Up & Go</h3>
+                    <p class="text-gray-600">Collect your vehicle from a convenient location and start your journey!</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Popular Vehicles Section -->
+    <section id="vehicles" class="py-16 bg-gray-100">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12" data-aos="fade-up">
+                <h2 class="text-3xl font-bold text-gray-800 mb-3">Popular Vehicles in Sri Lanka</h2>
+                <p class="text-lg text-gray-600 max-w-xl mx-auto">A diverse fleet to suit every traveler and budget.</p>
+            </div>
+            <div id="vehicles-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Vehicle cards will be dynamically inserted here by main.js -->
+                <div class="text-center py-10 col-span-full">Loading vehicles...</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Choose Us Section -->
+    <section id="why-us" class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12" data-aos="fade-up">
+                <h2 class="text-3xl font-bold text-gray-800 mb-3">Why Rent With VehicleRent Pro Sri Lanka?</h2>
+                <p class="text-lg text-gray-600 max-w-xl mx-auto">Your trusted partner for vehicle rentals in Sri Lanka.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div class="p-6 rounded-lg" data-aos="fade-up" data-aos-delay="100">
+                    <div class="w-16 h-16 feature-icon-bg rounded-full flex items-center justify-center mx-auto md:mx-0 mb-4"><i class="fas fa-map-marked-alt text-2xl"></i></div>
+                    <h3 class="text-xl font-semibold mb-2">Island-Wide Coverage</h3>
+                    <p class="text-gray-600">Pick up and drop off locations across Sri Lanka, including major airports.</p>
+                </div>
+                <div class="p-6 rounded-lg" data-aos="fade-up" data-aos-delay="200">
+                    <div class="w-16 h-16 feature-icon-bg rounded-full flex items-center justify-center mx-auto md:mx-0 mb-4"><i class="fas fa-lkr text-2xl">රු</i></div> <!-- LKR symbol -->
+                    <h3 class="text-xl font-semibold mb-2">Transparent LKR Pricing</h3>
+                    <p class="text-gray-600">No hidden fees. Competitive rates in Sri Lankan Rupees.</p>
+                </div>
+                <div class="p-6 rounded-lg" data-aos="fade-up" data-aos-delay="300">
+                    <div class="w-16 h-16 feature-icon-bg rounded-full flex items-center justify-center mx-auto md:mx-0 mb-4"><i class="fas fa-shield-alt text-2xl"></i></div>
+                    <h3 class="text-xl font-semibold mb-2">Well-Maintained Fleet</h3>
+                    <p class="text-gray-600">Regularly serviced and clean vehicles for your safety and comfort.</p>
+                </div>
+                <div class="p-6 rounded-lg" data-aos="fade-up" data-aos-delay="400">
+                    <div class="w-16 h-16 feature-icon-bg rounded-full flex items-center justify-center mx-auto md:mx-0 mb-4"><i class="fas fa-headset text-2xl"></i></div>
+                    <h3 class="text-xl font-semibold mb-2">24/7 Customer Support</h3>
+                    <p class="text-gray-600">We're here to help you anytime during your rental period.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Features Section -->
-    <section id="features" class="py-20 bg-white">
+    <!-- Testimonials Section -->
+    <section id="testimonials" class="py-16 bg-gray-100">
         <div class="container mx-auto px-4">
-            <div class="text-center mb-16" data-aos="fade-up">
-                <h2 class="text-4xl font-bold text-gray-800 mb-4">Powerful Features</h2>
-                <p class="text-xl text-gray-600 max-w-2xl mx-auto">
-                    Built with modern technology and designed for efficiency
-                </p>
+            <div class="text-center mb-12" data-aos="fade-up">
+                <h2 class="text-3xl font-bold text-gray-800 mb-3">What Our Customers Say</h2>
+                <p class="text-lg text-gray-600">Real experiences from satisfied renters in Sri Lanka.</p>
             </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <div class="text-center p-6 rounded-lg hover:shadow-lg transition" data-aos="fade-up" data-aos-delay="100">
-                    <div class="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-bolt text-primary-600 text-2xl"></i>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="testimonial-card p-6 rounded-lg shadow-sm" data-aos="fade-up" data-aos-delay="100">
+                    <p class="text-gray-700 mb-4">"Excellent service! The car was clean and perfect for our family trip around Kandy. Booking was super easy. Highly recommend VehicleRent Pro."</p>
+                    <div class="flex items-center">
+                        <img src="/placeholder.svg?width=40&height=40&text=A" alt="Customer Avatar" class="w-10 h-10 rounded-full mr-3">
+                        <div>
+                            <p class="font-semibold text-gray-800">Anura Perera</p>
+                            <p class="text-sm text-gray-500">Colombo, Sri Lanka</p>
+                        </div>
                     </div>
-                    <h3 class="text-xl font-semibold mb-3">Real-time Updates</h3>
-                    <p class="text-gray-600">Firebase-powered real-time synchronization across all devices and users.</p>
                 </div>
-
-                <div class="text-center p-6 rounded-lg hover:shadow-lg transition" data-aos="fade-up" data-aos-delay="200">
-                    <div class="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-shield-alt text-primary-600 text-2xl"></i>
+                <div class="testimonial-card p-6 rounded-lg shadow-sm" data-aos="fade-up" data-aos-delay="200">
+                    <p class="text-gray-700 mb-4">"Rented a van for a group tour to Ella. The vehicle was spacious and comfortable. The team was very helpful with airport pickup. Will use again!"</p>
+                    <div class="flex items-center">
+                        <img src="/placeholder.svg?width=40&height=40&text=S" alt="Customer Avatar" class="w-10 h-10 rounded-full mr-3">
+                        <div>
+                            <p class="font-semibold text-gray-800">Sarah Fernando</p>
+                            <p class="text-sm text-gray-500">Negombo, Sri Lanka</p>
+                        </div>
                     </div>
-                    <h3 class="text-xl font-semibold mb-3">Secure Authentication</h3>
-                    <p class="text-gray-600">Multi-provider authentication with Google, Facebook, and email.</p>
                 </div>
-
-                <div class="text-center p-6 rounded-lg hover:shadow-lg transition" data-aos="fade-up" data-aos-delay="300">
-                    <div class="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-mobile-alt text-primary-600 text-2xl"></i>
+                <div class="testimonial-card p-6 rounded-lg shadow-sm" data-aos="fade-up" data-aos-delay="300">
+                    <p class="text-gray-700 mb-4">"Best car rental experience in Sri Lanka. The rates were very competitive (in LKR!), and the car was in great condition. Made our coastal tour a breeze."</p>
+                    <div class="flex items-center">
+                        <img src="/placeholder.svg?width=40&height=40&text=R" alt="Customer Avatar" class="w-10 h-10 rounded-full mr-3">
+                        <div>
+                            <p class="font-semibold text-gray-800">Ravi Kumar</p>
+                            <p class="text-sm text-gray-500">Galle, Sri Lanka</p>
+                        </div>
                     </div>
-                    <h3 class="text-xl font-semibold mb-3">Mobile Responsive</h3>
-                    <p class="text-gray-600">Fully responsive design that works perfectly on all devices.</p>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Footer -->
-    <footer class="bg-gray-800 text-white py-12">
+    <footer id="contact" class="bg-gray-800 text-white py-16">
         <div class="container mx-auto px-4">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-                <!-- Company Info -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
                 <div>
                     <div class="flex items-center mb-4">
-                        <div class="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center mr-3">
-                            <i class="fas fa-car-side text-white"></i>
-                        </div>
-                        <div>
-                            <h3 class="text-xl font-bold">VehicleRent Pro</h3>
-                            <p class="text-xs text-gray-400">Firebase-Powered</p>
-                        </div>
+                        <div class="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center mr-3"><i class="fas fa-road text-white"></i></div>
+                        <div><h3 class="text-xl font-bold">VehicleRent Pro SL</h3></div>
                     </div>
-                    <p class="text-gray-400 mb-4">
-                        The future of vehicle rental management with Firebase integration and real-time capabilities.
-                    </p>
-                    <div class="flex space-x-4">
-                        <a href="#" class="text-gray-400 hover:text-white transition">
-                            <i class="fab fa-facebook-f"></i>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:text-white transition">
-                            <i class="fab fa-twitter"></i>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:text-white transition">
-                            <i class="fab fa-instagram"></i>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:text-white transition">
-                            <i class="fab fa-linkedin-in"></i>
-                        </a>
-                    </div>
+                    <p class="text-gray-400 mb-4">Your reliable partner for vehicle rentals across Sri Lanka. Explore with confidence.</p>
                 </div>
-                
-                <!-- Quick Links -->
                 <div>
                     <h4 class="text-lg font-semibold mb-4">Quick Links</h4>
                     <ul class="space-y-2">
                         <li><a href="#home" class="text-gray-400 hover:text-white transition">Home</a></li>
                         <li><a href="#vehicles" class="text-gray-400 hover:text-white transition">Vehicles</a></li>
-                        <li><a href="#features" class="text-gray-400 hover:text-white transition">Features</a></li>
-                        <li><a href="#how-it-works" class="text-gray-400 hover:text-white transition">How It Works</a></li>
-                        <li><a href="#contact" class="text-gray-400 hover:text-white transition">Contact</a></li>
+                        <li><a href="#why-us" class="text-gray-400 hover:text-white transition">Why Us</a></li>
+                        <li><a href="/terms.html" class="text-gray-400 hover:text-white transition">Terms & Conditions</a></li>
                     </ul>
                 </div>
-                
-                <!-- Services -->
                 <div>
-                    <h4 class="text-lg font-semibold mb-4">Services</h4>
+                    <h4 class="text-lg font-semibold mb-4">Vehicle Types</h4>
                     <ul class="space-y-2">
-                        <li><a href="#" class="text-gray-400 hover:text-white transition">Car Rental</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition">Long-term Lease</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition">Corporate Fleet</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition">Airport Pickup</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition">24/7 Support</a></li>
+                        <li><a href="#vehicles" class="text-gray-400 hover:text-white transition">Economy Cars</a></li>
+                        <li><a href="#vehicles" class="text-gray-400 hover:text-white transition">Sedans & Hatchbacks</a></li>
+                        <li><a href="#vehicles" class="text-gray-400 hover:text-white transition">SUVs & 4x4s</a></li>
+                        <li><a href="#vehicles" class="text-gray-400 hover:text-white transition">Vans & Minibuses</a></li>
                     </ul>
                 </div>
-                
-                <!-- Contact Info -->
                 <div>
-                    <h4 class="text-lg font-semibold mb-4">Contact Info</h4>
+                    <h4 class="text-lg font-semibold mb-4">Contact Us (Sri Lanka)</h4>
                     <div class="space-y-2 text-gray-400">
-                        <p><i class="fas fa-phone mr-2"></i> +1 (555) 123-4567</p>
-                        <p><i class="fas fa-envelope mr-2"></i> support@vehiclerentpro.com</p>
-                        <p><i class="fas fa-map-marker-alt mr-2"></i> 123 Business Ave, Suite 100</p>
-                        <p class="ml-6">City, State 12345</p>
+                        <p><i class="fas fa-phone mr-2"></i> +94 77 123 4567</p>
+                        <p><i class="fas fa-envelope mr-2"></i> support.lk@vehiclerentpro.com</p>
+                        <p><i class="fas fa-map-marker-alt mr-2"></i> 123 Galle Road, Colombo 03, Sri Lanka</p>
                     </div>
                 </div>
             </div>
-            
-            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray
+            <div class="border-t border-gray-700 pt-8 text-center text-gray-400">
+                <p>&copy; <span id="current-year"></span> VehicleRent Pro Sri Lanka. All rights reserved.</p>
+                <p class="mt-1 text-sm">Powered by Firebase. Designed for Sri Lanka.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script type="module" src="assets/js/main.js"></script>
+    <script>
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+    </script>
+</body>
+</html>
