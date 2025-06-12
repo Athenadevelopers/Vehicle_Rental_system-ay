@@ -2,8 +2,9 @@
  * Main JavaScript file for VehicleRentPro
  */
 
-import { firebaseAuth, firebaseDB } from "./firebase-config.js"
-import AOS from "aos" // Declare AOS variable
+// Declare AOS and firebase variables
+let AOS
+let firebase
 
 class VehicleRentalApp {
   constructor() {
@@ -25,11 +26,14 @@ class VehicleRentalApp {
       // Wait for Firebase to be initialized
       await this.waitForFirebase()
 
-      // Initialize AOS
-      AOS.init({
-        duration: 1000,
-        once: true,
-      })
+      // Initialize AOS if available
+      if (typeof AOS !== "undefined") {
+        AOS.init({
+          duration: 800,
+          easing: "ease-in-out",
+          once: true,
+        })
+      }
 
       // Set up event listeners
       this.setupEventListeners()
@@ -53,31 +57,31 @@ class VehicleRentalApp {
 
   async waitForFirebase() {
     return new Promise((resolve, reject) => {
-      // Check if Firebase is already initialized
-      if (window.firebaseInitializer && window.firebaseInitializer.isInitialized()) {
+      // Check if Firebase is already available
+      if (typeof firebase !== "undefined" && window.firebaseDB && window.firebaseAuth) {
         this.firebaseReady = true
         resolve()
         return
       }
 
-      // Listen for Firebase initialization event
-      const handleFirebaseInit = (event) => {
-        if (event.detail.success) {
+      // Wait for Firebase to be loaded
+      let attempts = 0
+      const maxAttempts = 50 // 5 seconds max wait
+
+      const checkFirebase = () => {
+        attempts++
+
+        if (typeof firebase !== "undefined" && window.firebaseDB && window.firebaseAuth) {
           this.firebaseReady = true
           resolve()
+        } else if (attempts >= maxAttempts) {
+          reject(new Error("Firebase initialization timeout"))
         } else {
-          reject(new Error(event.detail.error || "Firebase initialization failed"))
+          setTimeout(checkFirebase, 100)
         }
-        window.removeEventListener("firebaseInitialized", handleFirebaseInit)
       }
 
-      window.addEventListener("firebaseInitialized", handleFirebaseInit)
-
-      // Timeout after 30 seconds
-      setTimeout(() => {
-        window.removeEventListener("firebaseInitialized", handleFirebaseInit)
-        reject(new Error("Firebase initialization timeout"))
-      }, 30000)
+      checkFirebase()
     })
   }
 
@@ -119,11 +123,11 @@ class VehicleRentalApp {
 
     // Hero buttons
     document.getElementById("browse-vehicles-btn")?.addEventListener("click", () => {
-      document.getElementById("vehicles").scrollIntoView({ behavior: "smooth" })
+      document.getElementById("vehicles")?.scrollIntoView({ behavior: "smooth" })
     })
 
     document.getElementById("how-it-works-btn")?.addEventListener("click", () => {
-      document.getElementById("how-it-works").scrollIntoView({ behavior: "smooth" })
+      document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })
     })
 
     document.getElementById("get-started-btn")?.addEventListener("click", () => this.showAuthModal("register"))
@@ -149,7 +153,9 @@ class VehicleRentalApp {
 
   async loadCategories() {
     try {
-      const result = await firebaseDB.getCategories()
+      if (!window.firebaseDB) return
+
+      const result = await window.firebaseDB.getCategories()
       if (result.success) {
         this.categories = result.categories
         this.renderCategoryFilters()
@@ -162,7 +168,9 @@ class VehicleRentalApp {
 
   async loadVehicles() {
     try {
-      const result = await firebaseDB.getVehicles("available")
+      if (!window.firebaseDB) return
+
+      const result = await window.firebaseDB.getVehicles("available")
       if (result.success) {
         this.vehicles = result.vehicles
         this.renderVehicles()
@@ -180,18 +188,20 @@ class VehicleRentalApp {
 
     // Clear existing filters except "All Vehicles"
     const allButton = filtersContainer.querySelector('[data-category="all"]')
-    filtersContainer.innerHTML = ""
-    filtersContainer.appendChild(allButton)
+    if (allButton) {
+      filtersContainer.innerHTML = ""
+      filtersContainer.appendChild(allButton)
 
-    // Add category filters
-    this.categories.forEach((category) => {
-      const button = document.createElement("button")
-      button.className =
-        "vehicle-filter px-6 py-2 rounded-full bg-gray-200 text-gray-700 hover:bg-primary-600 hover:text-white transition"
-      button.setAttribute("data-category", category.id)
-      button.innerHTML = `<i class="${category.icon} mr-2"></i>${category.name}`
-      filtersContainer.appendChild(button)
-    })
+      // Add category filters
+      this.categories.forEach((category) => {
+        const button = document.createElement("button")
+        button.className =
+          "vehicle-filter px-6 py-2 rounded-full bg-gray-200 text-gray-700 hover:bg-primary-600 hover:text-white transition"
+        button.setAttribute("data-category", category.id)
+        button.innerHTML = `<i class="${category.icon} mr-2"></i>${category.name}`
+        filtersContainer.appendChild(button)
+      })
+    }
   }
 
   populateCategorySelect() {
@@ -381,13 +391,10 @@ class VehicleRentalApp {
       filteredVehicles = filteredVehicles.filter((vehicle) => vehicle.categoryId === searchData.category)
     }
 
-    // Check availability (simplified - in real app, check against bookings)
-    // For now, just show all available vehicles
-
     this.renderVehicles(filteredVehicles)
 
     // Scroll to vehicles section
-    document.getElementById("vehicles").scrollIntoView({ behavior: "smooth" })
+    document.getElementById("vehicles")?.scrollIntoView({ behavior: "smooth" })
 
     this.showNotification("Success", `Found ${filteredVehicles.length} available vehicles`, "success")
   }
@@ -418,7 +425,7 @@ class VehicleRentalApp {
   }
 
   async handleBookVehicle(vehicleId) {
-    if (!firebaseAuth.isAuthenticated()) {
+    if (!window.firebaseAuth || !window.firebaseAuth.isAuthenticated()) {
       this.showAuthModal("login")
       return
     }
@@ -442,6 +449,8 @@ class VehicleRentalApp {
     const title = document.getElementById("auth-modal-title")
     const content = document.getElementById("auth-modal-content")
 
+    if (!modal || !title || !content) return
+
     title.textContent = type === "login" ? "Sign In" : "Create Account"
 
     if (type === "login") {
@@ -459,8 +468,10 @@ class VehicleRentalApp {
 
   hideAuthModal() {
     const modal = document.getElementById("auth-modal")
-    modal.classList.add("hidden")
-    modal.classList.remove("flex")
+    if (modal) {
+      modal.classList.add("hidden")
+      modal.classList.remove("flex")
+    }
   }
 
   getLoginFormHTML() {
@@ -648,7 +659,12 @@ class VehicleRentalApp {
 
   async handleGoogleSignIn() {
     try {
-      const result = await firebaseAuth.signInWithGoogle()
+      if (!window.firebaseAuth) {
+        this.showNotification("Error", "Firebase not initialized", "error")
+        return
+      }
+
+      const result = await window.firebaseAuth.signInWithGoogle()
       if (result.success) {
         this.hideAuthModal()
         this.showNotification("Success", "Signed in successfully!", "success")
@@ -662,7 +678,12 @@ class VehicleRentalApp {
 
   async handleFacebookSignIn() {
     try {
-      const result = await firebaseAuth.signInWithFacebook()
+      if (!window.firebaseAuth) {
+        this.showNotification("Error", "Firebase not initialized", "error")
+        return
+      }
+
+      const result = await window.firebaseAuth.signInWithFacebook()
       if (result.success) {
         this.hideAuthModal()
         this.showNotification("Success", "Signed in successfully!", "success")
@@ -682,7 +703,12 @@ class VehicleRentalApp {
     const password = formData.get("password")
 
     try {
-      const result = await firebaseAuth.signInWithEmail(email, password)
+      if (!window.firebaseAuth) {
+        this.showNotification("Error", "Firebase not initialized", "error")
+        return
+      }
+
+      const result = await window.firebaseAuth.signInWithEmail(email, password)
       if (result.success) {
         this.hideAuthModal()
         this.showNotification("Success", "Signed in successfully!", "success")
@@ -715,7 +741,12 @@ class VehicleRentalApp {
     }
 
     try {
-      const result = await firebaseAuth.signUpWithEmail(email, password, {
+      if (!window.firebaseAuth) {
+        this.showNotification("Error", "Firebase not initialized", "error")
+        return
+      }
+
+      const result = await window.firebaseAuth.signUpWithEmail(email, password, {
         fullName: `${firstname} ${lastname}`,
         username: email.split("@")[0],
       })
@@ -736,7 +767,12 @@ class VehicleRentalApp {
     if (!email) return
 
     try {
-      const result = await firebaseAuth.resetPassword(email)
+      if (!window.firebaseAuth) {
+        this.showNotification("Error", "Firebase not initialized", "error")
+        return
+      }
+
+      const result = await window.firebaseAuth.resetPassword(email)
       if (result.success) {
         this.showNotification("Success", "Password reset email sent!", "success")
       } else {
@@ -749,7 +785,12 @@ class VehicleRentalApp {
 
   async handleLogout() {
     try {
-      const result = await firebaseAuth.signOut()
+      if (!window.firebaseAuth) {
+        this.showNotification("Error", "Firebase not initialized", "error")
+        return
+      }
+
+      const result = await window.firebaseAuth.signOut()
       if (result.success) {
         this.showNotification("Success", "Signed out successfully", "success")
       }
@@ -760,12 +801,16 @@ class VehicleRentalApp {
 
   toggleMobileMenu() {
     const mobileMenu = document.getElementById("mobile-menu")
-    mobileMenu.classList.toggle("hidden")
+    if (mobileMenu) {
+      mobileMenu.classList.toggle("hidden")
+    }
   }
 
   toggleUserMenu() {
     const dropdown = document.getElementById("user-dropdown")
-    dropdown.classList.toggle("hidden")
+    if (dropdown) {
+      dropdown.classList.toggle("hidden")
+    }
   }
 
   setDefaultDates() {
@@ -784,7 +829,6 @@ class VehicleRentalApp {
 
   updateStats() {
     // Update hero stats
-    const statsCustomers = document.getElementById("stats-customers")
     const statsVehicles = document.getElementById("stats-vehicles")
 
     if (statsVehicles) {
@@ -809,6 +853,8 @@ class VehicleRentalApp {
     const toastIcon = document.getElementById("toast-icon")
     const toastTitle = document.getElementById("toast-title")
     const toastMessage = document.getElementById("toast-message")
+
+    if (!toast || !toastIcon || !toastTitle || !toastMessage) return
 
     // Set content
     toastTitle.textContent = title
@@ -838,15 +884,200 @@ class VehicleRentalApp {
 
   hideNotification() {
     const toast = document.getElementById("notification-toast")
-    toast.classList.remove("translate-x-0")
-    toast.classList.add("translate-x-full")
+    if (toast) {
+      toast.classList.remove("translate-x-0")
+      toast.classList.add("translate-x-full")
+    }
   }
 }
 
 // Initialize app when DOM is loaded
 document.addEventListener("DOMContentLoaded", () => {
+  // Initialize AOS animation library if available
+  if (typeof AOS !== "undefined") {
+    AOS.init({
+      duration: 800,
+      easing: "ease-in-out",
+      once: true,
+    })
+  }
+
+  // Initialize the app
   window.app = new VehicleRentalApp()
+
+  // Handle mobile menu toggle
+  const mobileMenuBtn = document.getElementById("mobile-menu-btn")
+  const mobileMenu = document.getElementById("mobile-menu")
+
+  if (mobileMenuBtn && mobileMenu) {
+    mobileMenuBtn.addEventListener("click", () => {
+      mobileMenu.classList.toggle("hidden")
+    })
+  }
+
+  // Handle user menu toggle
+  const userMenuBtn = document.getElementById("user-menu-btn")
+  const userDropdown = document.getElementById("user-dropdown")
+
+  if (userMenuBtn && userDropdown) {
+    userMenuBtn.addEventListener("click", () => {
+      userDropdown.classList.toggle("hidden")
+    })
+
+    // Close dropdown when clicking outside
+    document.addEventListener("click", (event) => {
+      if (!userMenuBtn.contains(event.target) && !userDropdown.contains(event.target)) {
+        userDropdown.classList.add("hidden")
+      }
+    })
+  }
+
+  // Initialize sample data if Firebase is available
+  if (typeof firebase !== "undefined") {
+    initializeSampleData()
+  }
 })
+
+// Initialize sample data function
+async function initializeSampleData() {
+  try {
+    if (!window.firebaseDB) return
+
+    // Check if categories exist
+    const categoriesResult = await window.firebaseDB.getCategories()
+
+    if (!categoriesResult.success || categoriesResult.categories.length === 0) {
+      // Create sample categories
+      const categories = [
+        {
+          name: "Economy",
+          description: "Fuel-efficient and budget-friendly vehicles perfect for city driving",
+          icon: "fas fa-car",
+          sortOrder: 1,
+        },
+        {
+          name: "Compact",
+          description: "Small cars ideal for urban environments and short trips",
+          icon: "fas fa-car-side",
+          sortOrder: 2,
+        },
+        {
+          name: "Mid-size",
+          description: "Comfortable vehicles perfect for longer journeys and family trips",
+          icon: "fas fa-car-alt",
+          sortOrder: 3,
+        },
+        {
+          name: "SUV",
+          description: "Spacious vehicles ideal for families, groups, and outdoor adventures",
+          icon: "fas fa-truck",
+          sortOrder: 4,
+        },
+        {
+          name: "Luxury",
+          description: "Premium vehicles with high-end features and superior comfort",
+          icon: "fas fa-gem",
+          sortOrder: 5,
+        },
+        {
+          name: "Electric",
+          description: "Eco-friendly electric vehicles for sustainable transportation",
+          icon: "fas fa-leaf",
+          sortOrder: 6,
+        },
+      ]
+
+      for (const category of categories) {
+        await window.firebaseDB.createCategory(category)
+      }
+
+      console.log("Sample categories created")
+    }
+
+    // Check if vehicles exist
+    const vehiclesResult = await window.firebaseDB.getVehicles()
+
+    if (!vehiclesResult.success || vehiclesResult.vehicles.length === 0) {
+      // Get categories for vehicle creation
+      const updatedCategoriesResult = await window.firebaseDB.getCategories()
+
+      if (updatedCategoriesResult.success) {
+        const categories = updatedCategoriesResult.categories
+        const categoryMap = {}
+        categories.forEach((cat) => {
+          categoryMap[cat.name.toLowerCase()] = cat.id
+        })
+
+        // Create sample vehicles
+        const sampleVehicles = [
+          {
+            categoryId: categoryMap["economy"],
+            make: "Toyota",
+            model: "Corolla",
+            year: 2023,
+            licensePlate: "ECO001",
+            color: "White",
+            seats: 5,
+            fuelType: "petrol",
+            transmission: "automatic",
+            dailyRate: 45.0,
+            features: "Air Conditioning, Bluetooth, USB Charging, Backup Camera, Fuel Efficient",
+            mileage: 15000,
+            imageUrl:
+              "https://images.unsplash.com/photo-1549924231-f129b911e442?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
+          },
+          {
+            categoryId: categoryMap["suv"],
+            make: "Toyota",
+            model: "RAV4",
+            year: 2023,
+            licensePlate: "SUV001",
+            color: "Red",
+            seats: 7,
+            fuelType: "hybrid",
+            transmission: "automatic",
+            dailyRate: 80.0,
+            features: "AWD, Heated Seats, Apple CarPlay, Safety Suite, Hybrid Engine",
+            mileage: 5000,
+            imageUrl:
+              "https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
+          },
+          {
+            categoryId: categoryMap["luxury"],
+            make: "BMW",
+            model: "3 Series",
+            year: 2023,
+            licensePlate: "LUX001",
+            color: "Black",
+            seats: 5,
+            fuelType: "petrol",
+            transmission: "automatic",
+            dailyRate: 120.0,
+            features: "Leather Interior, Premium Sound, Navigation, Sport Package, Luxury Features",
+            mileage: 3000,
+            imageUrl:
+              "https://images.unsplash.com/photo-1555215695-3004980ad54e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
+          },
+        ]
+
+        for (const vehicle of sampleVehicles) {
+          if (vehicle.categoryId) {
+            await window.firebaseDB.createVehicle(vehicle)
+          }
+        }
+
+        console.log("Sample vehicles created")
+      }
+    }
+
+    // Initialize system settings
+    await window.firebaseDB.setSetting("site_name", "VehicleRent Pro", "Website name", "general")
+    await window.firebaseDB.setSetting("currency", "USD", "Default currency", "financial")
+    await window.firebaseDB.setSetting("tax_rate", "0.08", "Default tax rate (8%)", "financial")
+  } catch (error) {
+    console.error("Error initializing sample data:", error)
+  }
+}
 
 // Add CSS animations
 const style = document.createElement("style")

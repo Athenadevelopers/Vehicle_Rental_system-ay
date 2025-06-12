@@ -1,35 +1,4 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app"
-import {
-  getAuth,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signInWithPopup,
-  GoogleAuthProvider,
-  FacebookAuthProvider,
-  signOut,
-  onAuthStateChanged,
-  sendPasswordResetEmail,
-  updateProfile,
-} from "firebase/auth"
-import {
-  getFirestore,
-  doc,
-  setDoc,
-  getDoc,
-  updateDoc,
-  collection,
-  getDocs,
-  query,
-  where,
-  orderBy,
-  limit,
-  serverTimestamp,
-  increment,
-} from "firebase/firestore"
-import { getStorage } from "firebase/storage"
-
-// Your web app's Firebase configuration
+// Firebase configuration and initialization
 const firebaseConfig = {
   apiKey: "AIzaSyDzaniZd0ZJXU3Rk__wR8hjwfp8xI4_VO4",
   authDomain: "vehicle-rental-system-20698.firebaseapp.com",
@@ -37,31 +6,34 @@ const firebaseConfig = {
   storageBucket: "vehicle-rental-system-20698.firebasestorage.app",
   messagingSenderId: "86431969601",
   appId: "1:86431969601:web:574b2d2a212e70a5caf1c0",
+  measurementId: "G-XXXXXXXXXX",
 }
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig)
+// Declare the firebase variable before using it
+const firebase = window.firebase
 
-// Initialize Firebase services
-export const auth = getAuth(app)
-export const db = getFirestore(app)
-export const storage = getStorage(app)
+// Initialize Firebase (using global firebase object from CDN)
+let app, auth, db, storage
 
-// Initialize providers
-export const googleProvider = new GoogleAuthProvider()
-export const facebookProvider = new FacebookAuthProvider()
+// Check if Firebase is loaded from CDN
+if (typeof firebase !== "undefined") {
+  app = firebase.initializeApp(firebaseConfig)
+  auth = firebase.auth()
+  db = firebase.firestore()
+  storage = firebase.storage()
 
-// Configure providers
-googleProvider.setCustomParameters({
-  prompt: "select_account",
-})
+  // Enable offline persistence
+  db.enablePersistence().catch((err) => {
+    console.error("Firestore persistence error:", err)
+  })
 
-facebookProvider.setCustomParameters({
-  display: "popup",
-})
+  console.log("Firebase initialized successfully")
+} else {
+  console.error("Firebase SDK not loaded. Please check your CDN links.")
+}
 
 // Firebase Database Manager
-export class FirebaseDBManager {
+class FirebaseDBManager {
   constructor() {
     this.collections = {
       users: "users",
@@ -94,7 +66,7 @@ export class FirebaseDBManager {
   // Users Management
   async createUser(userData) {
     try {
-      const userRef = doc(db, this.collections.users, userData.uid)
+      const userRef = db.collection(this.collections.users).doc(userData.uid)
       const user = {
         uid: userData.uid,
         email: userData.email,
@@ -107,9 +79,9 @@ export class FirebaseDBManager {
         emailVerified: userData.emailVerified || false,
         photoURL: userData.photoURL || "",
         authProvider: userData.authProvider || "firebase",
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-        lastLoginAt: serverTimestamp(),
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        lastLoginAt: firebase.firestore.FieldValue.serverTimestamp(),
         preferences: {
           emailNotifications: true,
           pushNotifications: true,
@@ -123,7 +95,7 @@ export class FirebaseDBManager {
         },
       }
 
-      await setDoc(userRef, user)
+      await userRef.set(user)
       await this.logActivity(userData.uid, "user_created", "user", userData.uid, "User account created")
       return { success: true, user }
     } catch (error) {
@@ -134,10 +106,10 @@ export class FirebaseDBManager {
 
   async getUser(uid) {
     try {
-      const userRef = doc(db, this.collections.users, uid)
-      const userSnap = await getDoc(userRef)
+      const userRef = db.collection(this.collections.users).doc(uid)
+      const userSnap = await userRef.get()
 
-      if (userSnap.exists()) {
+      if (userSnap.exists) {
         return { success: true, user: userSnap.data() }
       } else {
         return { success: false, error: "User not found" }
@@ -150,13 +122,13 @@ export class FirebaseDBManager {
 
   async updateUser(uid, userData) {
     try {
-      const userRef = doc(db, this.collections.users, uid)
+      const userRef = db.collection(this.collections.users).doc(uid)
       const updateData = {
         ...userData,
-        updatedAt: serverTimestamp(),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
       }
 
-      await updateDoc(userRef, updateData)
+      await userRef.update(updateData)
       await this.logActivity(uid, "user_updated", "user", uid, "User profile updated")
       return { success: true }
     } catch (error) {
@@ -165,17 +137,17 @@ export class FirebaseDBManager {
     }
   }
 
-  async getAllUsers(role = null, limit_count = 50) {
+  async getAllUsers(role = null, limitCount = 50) {
     try {
-      let q = collection(db, this.collections.users)
+      let query = db.collection(this.collections.users)
 
       if (role) {
-        q = query(q, where("role", "==", role))
+        query = query.where("role", "==", role)
       }
 
-      q = query(q, orderBy("createdAt", "desc"), limit(limit_count))
+      query = query.orderBy("createdAt", "desc").limit(limitCount)
 
-      const querySnapshot = await getDocs(q)
+      const querySnapshot = await query.get()
       const users = []
 
       querySnapshot.forEach((doc) => {
@@ -192,7 +164,7 @@ export class FirebaseDBManager {
   // Vehicle Categories Management
   async createCategory(categoryData) {
     try {
-      const categoryRef = doc(db, this.collections.categories, this.generateId())
+      const categoryRef = db.collection(this.collections.categories).doc()
       const category = {
         id: categoryRef.id,
         name: categoryData.name,
@@ -200,11 +172,11 @@ export class FirebaseDBManager {
         icon: categoryData.icon || "fas fa-car",
         sortOrder: categoryData.sortOrder || 0,
         status: "active",
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
       }
 
-      await setDoc(categoryRef, category)
+      await categoryRef.set(category)
       return { success: true, category }
     } catch (error) {
       console.error("Error creating category:", error)
@@ -214,14 +186,13 @@ export class FirebaseDBManager {
 
   async getCategories() {
     try {
-      const q = query(
-        collection(db, this.collections.categories),
-        where("status", "==", "active"),
-        orderBy("sortOrder"),
-        orderBy("name"),
-      )
+      const query = db
+        .collection(this.collections.categories)
+        .where("status", "==", "active")
+        .orderBy("sortOrder")
+        .orderBy("name")
 
-      const querySnapshot = await getDocs(q)
+      const querySnapshot = await query.get()
       const categories = []
 
       querySnapshot.forEach((doc) => {
@@ -238,7 +209,7 @@ export class FirebaseDBManager {
   // Vehicles Management
   async createVehicle(vehicleData) {
     try {
-      const vehicleRef = doc(db, this.collections.vehicles, this.generateId())
+      const vehicleRef = db.collection(this.collections.vehicles).doc()
       const vehicle = {
         id: vehicleRef.id,
         categoryId: vehicleData.categoryId,
@@ -263,8 +234,8 @@ export class FirebaseDBManager {
         nextServiceDate: vehicleData.nextServiceDate || null,
         insuranceExpiry: vehicleData.insuranceExpiry || null,
         registrationExpiry: vehicleData.registrationExpiry || null,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
         stats: {
           totalBookings: 0,
           totalRevenue: 0,
@@ -273,7 +244,7 @@ export class FirebaseDBManager {
         },
       }
 
-      await setDoc(vehicleRef, vehicle)
+      await vehicleRef.set(vehicle)
       return { success: true, vehicle }
     } catch (error) {
       console.error("Error creating vehicle:", error)
@@ -281,26 +252,21 @@ export class FirebaseDBManager {
     }
   }
 
-  async getVehicles(status = null, categoryId = null, limit_count = 50) {
+  async getVehicles(status = null, categoryId = null, limitCount = 50) {
     try {
-      let q = collection(db, this.collections.vehicles)
-      const conditions = []
+      let query = db.collection(this.collections.vehicles)
 
       if (status) {
-        conditions.push(where("status", "==", status))
+        query = query.where("status", "==", status)
       }
 
       if (categoryId) {
-        conditions.push(where("categoryId", "==", categoryId))
+        query = query.where("categoryId", "==", categoryId)
       }
 
-      if (conditions.length > 0) {
-        q = query(q, ...conditions)
-      }
+      query = query.orderBy("createdAt", "desc").limit(limitCount)
 
-      q = query(q, orderBy("createdAt", "desc"), limit(limit_count))
-
-      const querySnapshot = await getDocs(q)
+      const querySnapshot = await query.get()
       const vehicles = []
 
       querySnapshot.forEach((doc) => {
@@ -316,10 +282,10 @@ export class FirebaseDBManager {
 
   async getVehicle(vehicleId) {
     try {
-      const vehicleRef = doc(db, this.collections.vehicles, vehicleId)
-      const vehicleSnap = await getDoc(vehicleRef)
+      const vehicleRef = db.collection(this.collections.vehicles).doc(vehicleId)
+      const vehicleSnap = await vehicleRef.get()
 
-      if (vehicleSnap.exists()) {
+      if (vehicleSnap.exists) {
         return { success: true, vehicle: vehicleSnap.data() }
       } else {
         return { success: false, error: "Vehicle not found" }
@@ -332,13 +298,13 @@ export class FirebaseDBManager {
 
   async updateVehicle(vehicleId, vehicleData) {
     try {
-      const vehicleRef = doc(db, this.collections.vehicles, vehicleId)
+      const vehicleRef = db.collection(this.collections.vehicles).doc(vehicleId)
       const updateData = {
         ...vehicleData,
-        updatedAt: serverTimestamp(),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
       }
 
-      await updateDoc(vehicleRef, updateData)
+      await vehicleRef.update(updateData)
       return { success: true }
     } catch (error) {
       console.error("Error updating vehicle:", error)
@@ -346,203 +312,13 @@ export class FirebaseDBManager {
     }
   }
 
-  // Bookings Management
-  async createBooking(bookingData) {
-    try {
-      const bookingRef = doc(db, this.collections.bookings, this.generateId())
-      const booking = {
-        id: bookingRef.id,
-        bookingNumber: this.generateBookingNumber(),
-        customerId: bookingData.customerId,
-        vehicleId: bookingData.vehicleId,
-        startDate: bookingData.startDate,
-        endDate: bookingData.endDate,
-        startTime: bookingData.startTime || "09:00",
-        endTime: bookingData.endTime || "18:00",
-        pickupLocation: bookingData.pickupLocation,
-        returnLocation: bookingData.returnLocation,
-        totalDays: bookingData.totalDays,
-        dailyRate: bookingData.dailyRate,
-        subtotal: bookingData.subtotal,
-        taxAmount: bookingData.taxAmount || 0,
-        discountAmount: bookingData.discountAmount || 0,
-        totalAmount: bookingData.totalAmount,
-        depositAmount: bookingData.depositAmount || 0,
-        status: "pending",
-        paymentStatus: "pending",
-        bookingDate: serverTimestamp(),
-        confirmedAt: null,
-        startedAt: null,
-        completedAt: null,
-        cancelledAt: null,
-        cancellationReason: "",
-        notes: bookingData.notes || "",
-        specialRequests: bookingData.specialRequests || "",
-        customerInfo: bookingData.customerInfo || {},
-        vehicleInfo: bookingData.vehicleInfo || {},
-      }
-
-      await setDoc(bookingRef, booking)
-
-      // Update vehicle status
-      await this.updateVehicle(bookingData.vehicleId, { status: "rented" })
-
-      // Update user stats
-      await this.updateUserStats(bookingData.customerId, {
-        totalBookings: increment(1),
-        activeBookings: increment(1),
-      })
-
-      await this.logActivity(
-        bookingData.customerId,
-        "booking_created",
-        "booking",
-        bookingRef.id,
-        `Booking created: ${booking.bookingNumber}`,
-      )
-
-      return { success: true, booking }
-    } catch (error) {
-      console.error("Error creating booking:", error)
-      return { success: false, error: error.message }
-    }
-  }
-
-  async getBookings(customerId = null, status = null, limit_count = 50) {
-    try {
-      let q = collection(db, this.collections.bookings)
-      const conditions = []
-
-      if (customerId) {
-        conditions.push(where("customerId", "==", customerId))
-      }
-
-      if (status) {
-        conditions.push(where("status", "==", status))
-      }
-
-      if (conditions.length > 0) {
-        q = query(q, ...conditions)
-      }
-
-      q = query(q, orderBy("bookingDate", "desc"), limit(limit_count))
-
-      const querySnapshot = await getDocs(q)
-      const bookings = []
-
-      querySnapshot.forEach((doc) => {
-        bookings.push({ id: doc.id, ...doc.data() })
-      })
-
-      return { success: true, bookings }
-    } catch (error) {
-      console.error("Error getting bookings:", error)
-      return { success: false, error: error.message }
-    }
-  }
-
-  async updateBookingStatus(bookingId, status, userId = null) {
-    try {
-      const bookingRef = doc(db, this.collections.bookings, bookingId)
-      const updateData = {
-        status: status,
-        updatedAt: serverTimestamp(),
-      }
-
-      // Set timestamp based on status
-      switch (status) {
-        case "confirmed":
-          updateData.confirmedAt = serverTimestamp()
-          break
-        case "active":
-          updateData.startedAt = serverTimestamp()
-          break
-        case "completed":
-          updateData.completedAt = serverTimestamp()
-          break
-        case "cancelled":
-          updateData.cancelledAt = serverTimestamp()
-          break
-      }
-
-      await updateDoc(bookingRef, updateData)
-
-      if (userId) {
-        await this.logActivity(
-          userId,
-          "booking_status_updated",
-          "booking",
-          bookingId,
-          `Booking status changed to: ${status}`,
-        )
-      }
-
-      return { success: true }
-    } catch (error) {
-      console.error("Error updating booking status:", error)
-      return { success: false, error: error.message }
-    }
-  }
-
-  // Payments Management
-  async createPayment(paymentData) {
-    try {
-      const paymentRef = doc(db, this.collections.payments, this.generateId())
-      const payment = {
-        id: paymentRef.id,
-        bookingId: paymentData.bookingId,
-        paymentReference: paymentData.paymentReference || this.generateId(),
-        amount: paymentData.amount,
-        paymentMethod: paymentData.paymentMethod || "cash",
-        paymentType: paymentData.paymentType || "booking",
-        paymentStatus: "completed",
-        transactionId: paymentData.transactionId || "",
-        gatewayResponse: paymentData.gatewayResponse || {},
-        paymentDate: serverTimestamp(),
-        processedAt: serverTimestamp(),
-        notes: paymentData.notes || "",
-        processedBy: paymentData.processedBy || "",
-      }
-
-      await setDoc(paymentRef, payment)
-      return { success: true, payment }
-    } catch (error) {
-      console.error("Error creating payment:", error)
-      return { success: false, error: error.message }
-    }
-  }
-
-  // Activity Logging
-  async logActivity(userId, action, entityType = null, entityId = null, description = null) {
-    try {
-      const activityRef = doc(db, this.collections.activities, this.generateId())
-      const activity = {
-        id: activityRef.id,
-        userId: userId,
-        action: action,
-        entityType: entityType,
-        entityId: entityId,
-        description: description,
-        ipAddress: await this.getClientIP(),
-        userAgent: navigator.userAgent,
-        createdAt: serverTimestamp(),
-      }
-
-      await setDoc(activityRef, activity)
-      return { success: true }
-    } catch (error) {
-      console.error("Error logging activity:", error)
-      return { success: false }
-    }
-  }
-
   // System Settings
   async getSetting(key, defaultValue = null) {
     try {
-      const settingRef = doc(db, this.collections.settings, key)
-      const settingSnap = await getDoc(settingRef)
+      const settingRef = db.collection(this.collections.settings).doc(key)
+      const settingSnap = await settingRef.get()
 
-      if (settingSnap.exists()) {
+      if (settingSnap.exists) {
         const data = settingSnap.data()
         return data.value
       } else {
@@ -556,20 +332,44 @@ export class FirebaseDBManager {
 
   async setSetting(key, value, description = "", category = "general") {
     try {
-      const settingRef = doc(db, this.collections.settings, key)
+      const settingRef = db.collection(this.collections.settings).doc(key)
       const setting = {
         key: key,
         value: value,
         description: description,
         category: category,
-        updatedAt: serverTimestamp(),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
       }
 
-      await setDoc(settingRef, setting, { merge: true })
+      await settingRef.set(setting, { merge: true })
       return { success: true }
     } catch (error) {
       console.error("Error setting value:", error)
       return { success: false, error: error.message }
+    }
+  }
+
+  // Activity Logging
+  async logActivity(userId, action, entityType = null, entityId = null, description = null) {
+    try {
+      const activityRef = db.collection(this.collections.activities).doc()
+      const activity = {
+        id: activityRef.id,
+        userId: userId,
+        action: action,
+        entityType: entityType,
+        entityId: entityId,
+        description: description,
+        ipAddress: await this.getClientIP(),
+        userAgent: navigator.userAgent,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      }
+
+      await activityRef.set(activity)
+      return { success: true }
+    } catch (error) {
+      console.error("Error logging activity:", error)
+      return { success: false }
     }
   }
 
@@ -594,120 +394,10 @@ export class FirebaseDBManager {
       return "unknown"
     }
   }
-
-  async updateUserStats(userId, stats) {
-    try {
-      const userRef = doc(db, this.collections.users, userId)
-      await updateDoc(userRef, {
-        [`stats.${Object.keys(stats)[0]}`]: Object.values(stats)[0],
-        updatedAt: serverTimestamp(),
-      })
-      return { success: true }
-    } catch (error) {
-      console.error("Error updating user stats:", error)
-      return { success: false }
-    }
-  }
-
-  // Check vehicle availability
-  async isVehicleAvailable(vehicleId, startDate, endDate, excludeBookingId = null) {
-    try {
-      const q = query(
-        collection(db, this.collections.bookings),
-        where("vehicleId", "==", vehicleId),
-        where("status", "in", ["confirmed", "active"]),
-      )
-
-      const querySnapshot = await getDocs(q)
-      const bookings = []
-
-      querySnapshot.forEach((doc) => {
-        const booking = doc.data()
-        if (excludeBookingId && doc.id === excludeBookingId) {
-          return // Skip this booking
-        }
-        bookings.push(booking)
-      })
-
-      // Check for date conflicts
-      const start = new Date(startDate)
-      const end = new Date(endDate)
-
-      for (const booking of bookings) {
-        const bookingStart = new Date(booking.startDate)
-        const bookingEnd = new Date(booking.endDate)
-
-        if (
-          (start >= bookingStart && start <= bookingEnd) ||
-          (end >= bookingStart && end <= bookingEnd) ||
-          (start <= bookingStart && end >= bookingEnd)
-        ) {
-          return false // Conflict found
-        }
-      }
-
-      return true // No conflicts
-    } catch (error) {
-      console.error("Error checking vehicle availability:", error)
-      return false
-    }
-  }
-
-  // Dashboard Statistics
-  async getDashboardStats(userId = null, role = "customer") {
-    try {
-      let stats = {}
-
-      if (role === "admin") {
-        // Admin dashboard stats
-        const usersSnapshot = await getDocs(
-          query(collection(db, this.collections.users), where("role", "==", "customer")),
-        )
-        stats.totalCustomers = usersSnapshot.size
-
-        const vehiclesSnapshot = await getDocs(collection(db, this.collections.vehicles))
-        stats.totalVehicles = vehiclesSnapshot.size
-
-        const availableVehiclesSnapshot = await getDocs(
-          query(collection(db, this.collections.vehicles), where("status", "==", "available")),
-        )
-        stats.availableVehicles = availableVehiclesSnapshot.size
-
-        const activeBookingsSnapshot = await getDocs(
-          query(collection(db, this.collections.bookings), where("status", "==", "active")),
-        )
-        stats.activeBookings = activeBookingsSnapshot.size
-
-        // Calculate total revenue
-        const bookingsSnapshot = await getDocs(
-          query(collection(db, this.collections.bookings), where("status", "in", ["completed", "active"])),
-        )
-        let totalRevenue = 0
-        bookingsSnapshot.forEach((doc) => {
-          totalRevenue += doc.data().totalAmount || 0
-        })
-        stats.totalRevenue = totalRevenue
-
-        stats.fleetUtilization =
-          stats.totalVehicles > 0 ? ((stats.totalVehicles - stats.availableVehicles) / stats.totalVehicles) * 100 : 0
-      } else if (role === "customer" && userId) {
-        // Customer dashboard stats
-        const userResult = await this.getUser(userId)
-        if (userResult.success) {
-          stats = userResult.user.stats || {}
-        }
-      }
-
-      return { success: true, stats }
-    } catch (error) {
-      console.error("Error getting dashboard stats:", error)
-      return { success: false, error: error.message }
-    }
-  }
 }
 
 // Firebase Auth Manager
-export class FirebaseAuthManager {
+class FirebaseAuthManager {
   constructor() {
     this.currentUser = null
     this.dbManager = new FirebaseDBManager()
@@ -715,14 +405,16 @@ export class FirebaseAuthManager {
   }
 
   initAuthStateListener() {
-    onAuthStateChanged(auth, async (user) => {
-      this.currentUser = user
-      if (user) {
-        await this.handleUserSignIn(user)
-      } else {
-        this.handleUserSignOut()
-      }
-    })
+    if (auth) {
+      auth.onAuthStateChanged(async (user) => {
+        this.currentUser = user
+        if (user) {
+          await this.handleUserSignIn(user)
+        } else {
+          this.handleUserSignOut()
+        }
+      })
+    }
   }
 
   async handleUserSignIn(user) {
@@ -743,7 +435,7 @@ export class FirebaseAuthManager {
       } else {
         // Update last login
         await this.dbManager.updateUser(user.uid, {
-          lastLoginAt: serverTimestamp(),
+          lastLoginAt: firebase.firestore.FieldValue.serverTimestamp(),
         })
       }
 
@@ -763,10 +455,10 @@ export class FirebaseAuthManager {
 
   async signUpWithEmail(email, password, userData) {
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password)
+      const userCredential = await auth.createUserWithEmailAndPassword(email, password)
       const user = userCredential.user
 
-      await updateProfile(user, {
+      await user.updateProfile({
         displayName: userData.fullName,
       })
 
@@ -791,7 +483,7 @@ export class FirebaseAuthManager {
 
   async signInWithEmail(email, password) {
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password)
+      const userCredential = await auth.signInWithEmailAndPassword(email, password)
       return { success: true, user: userCredential.user }
     } catch (error) {
       console.error("Firebase signin error:", error)
@@ -801,9 +493,14 @@ export class FirebaseAuthManager {
 
   async signInWithGoogle() {
     try {
-      const result = await signInWithPopup(auth, googleProvider)
+      const provider = new firebase.auth.GoogleAuthProvider()
+      provider.setCustomParameters({
+        prompt: "select_account",
+      })
+
+      const result = await auth.signInWithPopup(provider)
       const user = result.user
-      const isNewUser = result._tokenResponse?.isNewUser || false
+      const isNewUser = result.additionalUserInfo?.isNewUser || false
 
       if (isNewUser) {
         await this.dbManager.createUser({
@@ -825,9 +522,14 @@ export class FirebaseAuthManager {
 
   async signInWithFacebook() {
     try {
-      const result = await signInWithPopup(auth, facebookProvider)
+      const provider = new firebase.auth.FacebookAuthProvider()
+      provider.setCustomParameters({
+        display: "popup",
+      })
+
+      const result = await auth.signInWithPopup(provider)
       const user = result.user
-      const isNewUser = result._tokenResponse?.isNewUser || false
+      const isNewUser = result.additionalUserInfo?.isNewUser || false
 
       if (isNewUser) {
         await this.dbManager.createUser({
@@ -849,7 +551,7 @@ export class FirebaseAuthManager {
 
   async signOut() {
     try {
-      await signOut(auth)
+      await auth.signOut()
       return { success: true }
     } catch (error) {
       console.error("Signout error:", error)
@@ -859,7 +561,7 @@ export class FirebaseAuthManager {
 
   async resetPassword(email) {
     try {
-      await sendPasswordResetEmail(auth, email)
+      await auth.sendPasswordResetEmail(email)
       return { success: true }
     } catch (error) {
       console.error("Password reset error:", error)
@@ -945,38 +647,30 @@ export class FirebaseAuthManager {
     const role = await this.getUserRole()
     return role === "customer"
   }
-
-  // Wait for auth state to be determined
-  waitForAuth() {
-    return new Promise((resolve) => {
-      if (this.currentUser !== null) {
-        resolve(this.currentUser)
-      } else {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
-          this.currentUser = user
-          unsubscribe()
-          resolve(user)
-        })
-      }
-    })
-  }
-
-  async initialize() {
-    try {
-      // Wait for auth state to be determined
-      await this.waitForAuth()
-      console.log("Firebase Auth initialized successfully")
-      return { success: true }
-    } catch (error) {
-      console.error("Firebase Auth initialization failed:", error)
-      return { success: false, error: error.message }
-    }
-  }
 }
 
-// Initialize Firebase Auth Manager
-export const firebaseAuth = new FirebaseAuthManager()
-export const firebaseDB = new FirebaseDBManager()
+// Initialize managers
+let firebaseAuth, firebaseDB
 
-// Export default app
-export default app
+// Wait for Firebase to be loaded
+if (typeof firebase !== "undefined") {
+  firebaseAuth = new FirebaseAuthManager()
+  firebaseDB = new FirebaseDBManager()
+} else {
+  // If Firebase is not loaded yet, wait for it
+  document.addEventListener("DOMContentLoaded", () => {
+    if (typeof firebase !== "undefined") {
+      firebaseAuth = new FirebaseAuthManager()
+      firebaseDB = new FirebaseDBManager()
+    }
+  })
+}
+
+// Export for use in other modules
+window.firebaseAuth = firebaseAuth
+window.firebaseDB = firebaseDB
+window.firebase = firebase
+
+// Also export as named exports for ES6 modules
+export { firebase, firebaseAuth, firebaseDB, auth, db, storage, app }
+export default firebase

@@ -1,35 +1,237 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VehicleRent Pro</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VehicleRent Pro - Premium Vehicle Rental System</title>
+    
+    <!-- Meta Tags -->
+    <meta name="description" content="Professional vehicle rental management system with Firebase integration">
+    <meta name="keywords" content="vehicle rental, car rental, firebase, booking system">
+    <meta name="author" content="VehicleRent Pro">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
+    
+    <!-- CSS Libraries -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link href="assets/css/style.css" rel="stylesheet">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-storage-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-analytics-compat.js"></script>
+    
+    <!-- Firebase Config -->
+    <script>
+      // Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyBxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        authDomain: "vehicle-rental-system-xxxxx.firebaseapp.com",
+        projectId: "vehicle-rental-system-xxxxx",
+        storageBucket: "vehicle-rental-system-xxxxx.appspot.com",
+        messagingSenderId: "xxxxxxxxxxxx",
+        appId: "1:xxxxxxxxxxxx:web:xxxxxxxxxxxxxxxxxxxxxxxx",
+        measurementId: "G-XXXXXXXXXX"
+      };
+      
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
+      firebase.analytics();
+      
+      // Initialize Firebase services
+      const auth = firebase.auth();
+      const db = firebase.firestore();
+      const storage = firebase.storage();
+      
+      // Enable offline persistence
+      db.enablePersistence()
+        .catch((err) => {
+          console.error("Firestore persistence error:", err);
+        });
+    </script>
 </head>
-<body class="bg-gray-100">
-
-  <!-- Loading Screen -->
-  <div id="loading-screen" class="fixed inset-0 bg-white z-50 flex items-center justify-center">
-    <div class="text-center">
-      <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-primary-600 mx-auto mb-6"></div>
-      <h2 class="text-2xl font-bold text-gray-800 mb-2">VehicleRent Pro</h2>
-      <p class="text-gray-600 mb-4">Loading your rental experience...</p>
-      <div id="initialization-status" class="text-sm text-gray-500">
-        Initializing system...
-      </div>
+<body class="bg-gray-50">
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="fixed inset-0 bg-white z-50 flex items-center justify-center">
+        <div class="text-center">
+            <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-primary-600 mx-auto mb-4"></div>
+            <h3 class="text-lg font-medium text-gray-900">Loading VehicleRent Pro...</h3>
+            <p class="text-sm text-gray-600 mt-2">Initializing Firebase services</p>
+        </div>
     </div>
-  </div>
 
-  <!-- Main Content (Example) -->
-  <div class="container mx-auto py-8">
-    <h1 class="text-3xl font-bold text-gray-800 mb-4">Welcome to VehicleRent Pro!</h1>
-    <p class="text-gray-700">This is a placeholder for the main content of your application.</p>
-  </div>
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg sticky top-0 z-40" id="main-nav">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <!-- Logo -->
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-car-side text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-800">VehicleRent Pro</h1>
+                        <p class="text-xs text-gray-500">Premium Rental System</p>
+                    </div>
+                </div>
 
-  <!-- Firebase Initialization -->
-  <script type="module" src="assets/js/firebase-init.js"></script>
-  <script type="module" src="assets/js/main.js"></script>
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#home" class="text-gray-700 hover:text-primary-600 transition">Home</a>
+                    <a href="#vehicles" class="text-gray-700 hover:text-primary-600 transition">Vehicles</a>
+                    <a href="#features" class="text-gray-700 hover:text-primary-600 transition">Features</a>
+                    <a href="#how-it-works" class="text-gray-700 hover:text-primary-600 transition">How It Works</a>
+                    <a href="#contact" class="text-gray-700 hover:text-primary-600 transition">Contact</a>
+                </div>
 
+                <!-- Auth Buttons (shown when not logged in) -->
+                <div class="auth-buttons flex items-center space-x-4">
+                    <button id="login-btn" class="text-gray-700 hover:text-primary-600 transition">
+                        <i class="fas fa-sign-in-alt mr-2"></i>Login
+                    </button>
+                    <button id="register-btn" class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg transition">
+                        <i class="fas fa-user-plus mr-2"></i>Sign Up
+                    </button>
+                </div>
+
+                <!-- User Menu (shown when logged in) -->
+                <div class="user-menu hidden relative">
+                    <button id="user-menu-btn" class="flex items-center space-x-3 text-gray-700 hover:text-primary-600 transition">
+                        <img id="user-avatar" src="https://via.placeholder.com/32" alt="User Avatar" class="w-8 h-8 rounded-full">
+                        <span id="user-name" class="user-name">User Name</span>
+                        <i class="fas fa-chevron-down text-xs"></i>
+                    </button>
+                    
+                    <!-- Dropdown Menu -->
+                    <div id="user-dropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border hidden">
+                        <div class="py-2">
+                            <a href="#" id="dashboard-link" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
+                            </a>
+                            <a href="#" id="profile-link" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                <i class="fas fa-user mr-2"></i>Profile
+                            </a>
+                            <a href="#" id="bookings-link" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                <i class="fas fa-calendar-alt mr-2"></i>My Bookings
+                            </a>
+                            <div class="border-t border-gray-100 my-1"></div>
+                            <button id="logout-btn" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <button id="mobile-menu-btn" class="md:hidden text-gray-700">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="md:hidden bg-white border-t hidden">
+            <div class="px-4 py-2 space-y-2">
+                <a href="#home" class="block py-2 text-gray-700 hover:text-primary-600 transition">Home</a>
+                <a href="#vehicles" class="block py-2 text-gray-700 hover:text-primary-600 transition">Vehicles</a>
+                <a href="#features" class="block py-2 text-gray-700 hover:text-primary-600 transition">Features</a>
+                <a href="#how-it-works" class="block py-2 text-gray-700 hover:text-primary-600 transition">How It Works</a>
+                <a href="#contact" class="block py-2 text-gray-700 hover:text-primary-600 transition">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Rest of your HTML content -->
+    <!-- ... -->
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <!-- Company Info -->
+                <div>
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-car-side text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold">VehicleRent Pro</h3>
+                            <p class="text-xs text-gray-400">Firebase-Powered</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 mb-4">
+                        The future of vehicle rental management with Firebase integration and real-time capabilities.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white transition">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Quick Links -->
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Quick Links</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#home" class="text-gray-400 hover:text-white transition">Home</a></li>
+                        <li><a href="#vehicles" class="text-gray-400 hover:text-white transition">Vehicles</a></li>
+                        <li><a href="#features" class="text-gray-400 hover:text-white transition">Features</a></li>
+                        <li><a href="#how-it-works" class="text-gray-400 hover:text-white transition">How It Works</a></li>
+                        <li><a href="#contact" class="text-gray-400 hover:text-white transition">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Services -->
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Services</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Car Rental</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Long-term Lease</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Corporate Fleet</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Airport Pickup</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">24/7 Support</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Contact Info -->
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Contact Info</h4>
+                    <div class="space-y-2 text-gray-400">
+                        <p><i class="fas fa-phone mr-2"></i> +1 (555) 123-4567</p>
+                        <p><i class="fas fa-envelope mr-2"></i> support@vehiclerentpro.com</p>
+                        <p><i class="fas fa-map-marker-alt mr-2"></i> 123 Business Ave, Suite 100</p>
+                        <p class="ml-6">City, State 12345</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2024 VehicleRent Pro. All rights reserved. Powered by Firebase.</p>
+                <p class="mt-2">Developed by: Sahan Weerasinghe @ Athena Development (pvt) Ltd 2025</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript Libraries -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    
+    <!-- Main JavaScript -->
+    <script src="assets/js/main.js"></script>
 </body>
 </html>
