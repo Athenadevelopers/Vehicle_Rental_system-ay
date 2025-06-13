@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - VehicleRent Pro Sri Lanka</title>
+    
+    <meta name="description" content="Learn about VehicleRent Pro Sri Lanka - our story, mission, and commitment to providing the best vehicle rental experience across Sri Lanka.">
+    <meta name="keywords" content="vehicle rental sri lanka, about us, car rental company, sri lanka car hire">
+    
+    <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <link href="assets/css/style.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="fixed inset-0 bg-white z-50 flex items-center justify-center">
+        <div class="text-center">
+            <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-primary-600 mx-auto mb-4"></div>
+            <h3 class="text-lg font-medium text-gray-900">Loading VehicleRent Pro...</h3>
+            <p class="text-sm text-gray-600 mt-2">Please wait</p>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md sticky top-0 z-40" id="main-nav">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-3">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-road text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-800">VehicleRent Pro</h1>
+                        <p class="text-xs text-gray-500">Sri Lanka</p>
+                    </div>
+                </div>
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="index.html" class="text-gray-600 hover:text-primary-600 transition font-medium">Home</a>
+                    <div class="relative group">
+                        <button class="text-gray-600 hover:text-primary-600 transition font-medium flex items-center">
+                            Vehicles <i class="fas fa-chevron-down ml-1 text-xs"></i>
+                        </button>
+                        <div class="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg border hidden group-hover:block">
+                            <div class="py-1">
+                                <a href="vehicles.html?category=budget" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Budget Cars</a>
+                                <a href="vehicles.html?category=sedan" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Sedans</a>
+                                <a href="vehicles.html?category=suv" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">SUVs & Jeeps</a>
+                                <a href="vehicles.html?category=van" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Vans</a>
+                                <a href="vehicles.html?category=luxury" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Luxury Cars</a>
+                                <div class="border-t border-gray-100 my-1"></div>
+                                <a href="vehicles.html" class="block px-4 py-2 text-sm text-primary-600 hover:bg-gray-100">View All Vehicles</a>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="about-us.html" class="text-primary-600 hover:text-primary-700 transition font-medium">About Us</a>
+                    <a href="contact-us.html" class="text-gray-600 hover:text-primary-600 transition font-medium">Contact</a>
+                </div>
+                <div class="auth-buttons flex items-center space-x-3">
+                    <button id="login-btn" class="text-gray-600 hover:text-primary-600 transition font-medium">
+                        <i class="fas fa-sign-in-alt mr-1"></i>Login
+                    </button>
+                    <button id="register-btn" class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-md transition font-semibold text-sm">
+                        <i class="fas fa-user-plus mr-1"></i>Sign Up
+                    </button>
+                </div>
+                <div class="user-menu hidden relative">
+                    <button id="user-menu-btn" class="flex items-center space-x-3 text-gray-700 hover:text-primary-600 transition">
+                        <img id="user-avatar" src="/placeholder.svg?width=32&height=32&text=User" alt="User Avatar" class="w-8 h-8 rounded-full">
+                        <span id="user-name" class="user-name font-medium">User Name</span>
+                        <i class="fas fa-chevron-down text-xs"></i>
+                    </button>
+                    <div id="user-dropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border hidden py-1">
+                        <a href="#" id="dashboard-link" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"><i class="fas fa-tachometer-alt mr-2"></i>Dashboard</a>
+                        <a href="#" id="profile-link" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"><i class="fas fa-user mr-2"></i>Profile</a>
+                        <a href="#" id="bookings-link" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"><i class="fas fa-calendar-alt mr-2"></i>My Bookings</a>
+                        <div class="border-t border-gray-100 my-1"></div>
+                        <button id="logout-btn" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"><i class="fas fa-sign-out-alt mr-2"></i>Logout</button>
+                    </div>
+                </div>
+                <button id="mobile-menu-btn" class="md:hidden text-gray-700"><i class="fas fa-bars text-xl"></i></button>
+            </div>
+        </div>
+        <div id="mobile-menu" class="md:hidden bg-white border-t hidden">
+            <div class="px-4 py-2 space-y-2">
+                <a href="index.html" class="block py-2 text-gray-700 hover:text-primary-600 transition">Home</a>
+                <div class="py-2">
+                    <button class="flex items-center justify-between w-full text-gray-700 hover:text-primary-600 transition" onclick="toggleMobileSubmenu()">
+                        Vehicles <i class="fas fa-chevron-down ml-1 text-xs"></i>
+                    </button>
+                    <div id="mobile-submenu" class="hidden pl-4 mt-2 space-y-2">
+                        <a href="vehicles.html?category=budget" class="block py-2 text-gray-700 hover:text-primary-600 transition">Budget Cars</a>
+                        <a href="vehicles.html?category=sedan" class="block py-2 text-gray-700 hover:text-primary-600 transition">Sedans</a>
+                        <a href="vehicles.html?category=suv" class="block py-2 text-gray-700 hover:text-primary-600 transition">SUVs & Jeeps</a>
+                        <a href="vehicles.html?category=van" class="block py-2 text-gray-700 hover:text-primary-600 transition">Vans</a>
+                        <a href="vehicles.html?category=luxury" class="block py-2 text-gray-700 hover:text-primary-600 transition">Luxury Cars</a>
+                        <a href="vehicles.html" class="block py-2 text-primary-600 hover:text-primary-700 transition">View All Vehicles</a>
+                    </div>
+                </div>
+                <a href="about-us.html" class="block py-2 text-primary-600 hover:text-primary-700 transition">About Us</a>
+                <a href="contact-us.html" class="block py-2 text-gray-700 hover:text-primary-600 transition">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="bg-gradient-to-r from-primary-600 to-primary-800 text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div>
+                    <h1 class="text-3xl md:text-4xl font-bold mb-2">About VehicleRent Pro Sri Lanka</h1>
+                    <p class="text-primary-100">Your trusted partner for vehicle rentals across the island</p>
+                </div>
+                <div class="mt-4 md:mt-0">
+                    <nav class="flex" aria-label="Breadcrumb">
+                        <ol class="flex items-center space-x-2">
+                            <li><a href="index.html" class="text-primary-100 hover:text-white">Home</a></li>
+                            <li class="flex items-center">
+                                <i class="fas fa-chevron-right text-primary-300 mx-2 text-xs"></i>
+                                <span class="text-white">About Us</span>
+                            </li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Our Story Section -->
+    <section class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <div data-aos="fade-right">
+                    <img src="/placeholder.svg?width=600&height=400&text=Our+Story" alt="VehicleRent Pro Sri Lanka Team" class="rounded-lg shadow-lg w-full">
+                </div>
+                <div data-aos="fade-left">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-6">Our Story</h2>
+                    <p class="text-gray-600 mb-4">
+                        Founded in 2015, VehicleRent Pro Sri Lanka began with a simple mission: to provide tourists and locals with reliable, affordable, and convenient vehicle rental services across the beautiful island of Sri Lanka.
+                    </p>
+                    <p class="text-gray-600 mb-4">
+                        What started as a small fleet of just 5 vehicles in Colombo has now grown to over 100 vehicles across multiple locations in Sri Lanka. Our journey has been one of continuous improvement, learning from our customers, and adapting to the unique needs of travelers in Sri Lanka.
+                    </p>
+                    <p class="text-gray-600">
+                        Today, we're proud to be one of the leading vehicle rental services in the country, known for our exceptional customer service, well-maintained fleet, and commitment to making your journey through Sri Lanka as smooth and enjoyable as possible.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mission & Values Section -->
+    <section class="py-16 bg-gray-100">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12" data-aos="fade-up">
+                <h2 class="text-3xl font-bold text-gray-800 mb-3">Our Mission & Values</h2>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+                    Guided by our commitment to excellence and customer satisfaction
+                </p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-md" data-aos="fade-up" data-aos-delay="100">
+                    <div class="w-16 h-16 bg-primary-100 text-primary-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-bullseye text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-center mb-3">Our Mission</h3>
+                    <p class="text-gray-600">
+                        To provide safe, reliable, and affordable vehicle rental solutions that enable our customers to explore Sri Lanka with confidence and convenience, while delivering exceptional service at every touchpoint.
+                    </p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md" data-aos="fade-up" data-aos-delay="200">
+                    <div class="w-16 h-16 bg-primary-100 text-primary-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-eye text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-center mb-3">Our Vision</h3>
+                    <p class="text-gray-600">
+                        To be the most trusted and preferred vehicle rental service in Sri Lanka, recognized for our commitment to quality, innovation, and customer satisfaction, while contributing positively to local communities.
+                    </p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md" data-aos="fade-up" data-aos-delay="300">
+                    <div class="w-16 h-16 bg-primary-100 text-primary-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-star text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-center mb-3">Our Values</h3>
+                    <ul class="text-gray-600 space-y-2">
+                        <li><span class="font-medium">Integrity:</span> We operate with honesty and transparency</li>
+                        <li><span class="font-medium">Excellence:</span> We strive for the highest standards</li>
+                        <li><span class="font-medium">Customer Focus:</span> We put our customers first</li>
+                        <li><span class="font-medium">Reliability:</span> We deliver on our promises</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Choose Us Section -->
+    <section class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12" data-aos="fade-up">
+                <h2 class="text-3xl font-bold text-gray-800 mb-3">Why Choose VehicleRent Pro Sri Lanka?</h2>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+                    We're committed to providing the best vehicle rental experience in Sri Lanka
+                </p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div class="text-center" data-aos="fade-up" data-aos-delay="100">
+                    <div class="w-16 h-16 bg-primary-100 text-primary-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-car text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">Diverse Fleet</h3>
+                    <p class="text-gray-600">
+                        From budget-friendly hatchbacks to luxury sedans and spacious vans, we have the perfect vehicle for every need and budget.
+                    </p>
+                </div>
+                <div class="text-center" data-aos="fade-up" data-aos-delay="200">
+                    <div class="w-16 h-16 bg-primary-100 text-primary-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-map-marked-alt text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">Island-wide Coverage</h3>
+                    <p class="text-gray-600">
+                        With pickup and drop-off locations across Sri Lanka, we make it convenient to start your journey from anywhere on the island.
+                    </p>
+                </div>
+                <div class="text-center" data-aos="fade-up" data-aos-delay="300">
+                    <div class="w-16 h-16 bg-primary-100 text-primary-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-tools text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">Well-Maintained Vehicles</h3>
+                    <p class="text-gray-600">
+                        All our vehicles undergo regular maintenance and thorough cleaning to ensure safety, reliability, and comfort.
+                    </p>
+                </div>
+                <div class="text-center" data-aos="fade-up" data-aos-delay="400">
+                    <div class="w-16 h-16 bg-primary-100 text-primary-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-headset text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">24/7 Support</h3>
+                    <p class="text-gray-600">
+                        Our dedicated customer support team is available around the clock to assist you with any queries or issues during your rental.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Team Section -->
+    <section class="py-16 bg-gray-100">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12" data-aos="fade-up">
+                <h2 class="text-3xl font-bold text-gray-800 mb-3">Meet Our Team</h2>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+                    The dedicated professionals behind VehicleRent Pro Sri Lanka
+                </p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div class="bg-white rounded-lg overflow-hidden shadow-md" data-aos="fade-up" data-aos-delay="100">
+                    <img src="/placeholder.svg?width=300&height=300&text=Team+Member" alt="Rajitha Perera - CEO" class="w-full h-64 object-cover">
+                    <div class="p-4 text-center">
+                        <h3 class="text-xl font-semibold text-gray-800">Rajitha Perera</h3>
+                        <p class="text-primary-600 mb-2">Chief Executive Officer</p>
+                        <p class="text-sm text-gray-600">
+                            With over 15 years in the tourism and transportation industry, Rajitha leads our company with vision and expertise.
+                        </p>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg overflow-hidden shadow-md" data-aos="fade-up" data-aos-delay="200">
+                    <img src="/placeholder.svg?width=300&height=300&text=Team+Member" alt="Kumari Silva - Operations Manager" class="w-full h-64 object-cover">
+                    <div class="p-4 text-center">
+                        <h3 class="text-xl font-semibold text-gray-800">Kumari Silva</h3>
+                        <p class="text-primary-600 mb-2">Operations Manager</p>
+                        <p class="text-sm text-gray-600">
+                            Kumari ensures that our day-to-day operations run smoothly and that every vehicle is in perfect condition.
+                        </p>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg overflow-hidden shadow-md" data-aos="fade-up" data-aos-delay="300">
+                    <img src="/placeholder.svg?width=300&height=300&text=Team+Member" alt="Dinesh Fernando - Fleet Manager" class="w-full h-64 object-cover">
+                    <div class="p-4 text-center">
+                        <h3 class="text-xl font-semibold text-gray-800">Dinesh Fernando</h3>
+                        <p class="text-primary-600 mb-2">Fleet Manager</p>
+                        <p class="text-sm text-gray-600">
+                            Dinesh oversees our entire fleet, ensuring all vehicles meet our strict safety and quality standards.
+                        </p>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg overflow-hidden shadow-md" data-aos="fade-up" data-aos-delay="400">
+                    <img src="/placeholder.svg?width=300&height=300&text=Team+Member" alt="Priyanka Jayawardena - Customer Relations" class="w-full h-64 object-cover">
+                    <div class="p-4 text-center">
+                        <h3 class="text-xl font-semibold text-gray-800">Priyanka Jayawardena</h3>
+                        <p class="text-primary-600 mb-2">Customer Relations</p>
+                        <p class="text-sm text-gray-600">
+                            Priyanka leads our customer service team, ensuring every client receives personalized attention and support.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12" data-aos="fade-up">
+                <h2 class="text-3xl font-bold text-gray-800 mb-3">What Our Customers Say</h2>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+                    Hear from travelers who have experienced our service
+                </p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-gray-50 p-6 rounded-lg shadow-md" data-aos="fade-up" data-aos-delay="100">
+                    <div class="flex items-center mb-4">
+                        <div class="text-primary-600 mr-2">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <span class="text-gray-600 text-sm">5.0</span>
+                    </div>
+                    <p class="text-gray-600 italic mb-4">
+                        "We rented a van for our family trip around Sri Lanka. The vehicle was in excellent condition, and the service was outstanding. The staff went above and beyond to accommodate our needs."
+                    </p>
+                    <div class="flex items-center">
+                        <img src="/placeholder.svg?width=50&height=50&text=J" alt="John Smith" class="w-10 h-10 rounded-full mr-3">
+                        <div>
+                            <h4 class="font-semibold text-gray-800">John Smith</h4>
+                            <p class="text-sm text-gray-500">United Kingdom</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 p-6 rounded-lg shadow-md" data-aos="fade-up" data-aos-delay="200">
+                    <div class="flex items-center mb-4">
+                        <div class="text-primary-600 mr-2">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <span class="text-gray-600 text-sm">5.0</span>
+                    </div>
+                    <p class="text-gray-600 italic mb-4">
+                        "As a local business traveler, I regularly rent from VehicleRent Pro. Their prices are competitive, the vehicles are always clean, and the booking process is seamless. Highly recommended!"
+                    </p>
+                    <div class="flex items-center">
+                        <img src="/placeholder.svg?width=50&height=50&text=A" alt="Amal Perera" class="w-10 h-10 rounded-full mr-3">
+                        <div>
+                            <h4 class="font-semibold text-gray-800">Amal Perera</h4>
+                            <p class="text-sm text-gray-500">Colombo, Sri Lanka</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 p-6 rounded-lg shadow-md" data-aos="fade-up" data-aos-delay="300">
+                    <div class="flex items-center mb-4">
+                        <div class="text-primary-600 mr-2">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
+                        </div>
+                        <span class="text-gray-600 text-sm">4.5</span>
+                    </div>
+                    <p class="text-gray-600 italic mb-4">
+                        "We rented an SUV for our honeymoon trip around Sri Lanka. The vehicle was perfect for the varied terrain, and the customer service was exceptional. Will definitely use them again!"
+                    </p>
+                    <div class="flex items-center">
+                        <img src="/placeholder.svg?width=50&height=50&text=S" alt="Sarah Johnson" class="w-10 h-10 rounded-full mr-3">
+                        <div>
+                            <h4 class="font-semibold text-gray-800">Sarah Johnson</h4>
+                            <p class="text-sm text-gray-500">Australia</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-16 bg-primary-600 text-white">
+        <div class="container mx-auto px-4 text-center">
+            <h2 class="text-3xl font-bold mb-4" data-aos="fade-up">Ready to Explore Sri Lanka?</h2>
+            <p class="text-lg text-primary-100 mb-8 max-w-2xl mx-auto" data-aos="fade-up" data-aos-delay="100">
+                Book your vehicle today and experience the freedom to discover the beauty of Sri Lanka at your own pace.
+            </p>
+            <div class="flex flex-col sm:flex-row justify-center gap-4" data-aos="fade-up" data-aos-delay="200">
+                <a href="vehicles.html" class="bg-white text-primary-600 hover:bg-gray-100 px-8 py-3 rounded-md font-semibold transition">
+                    Browse Our Fleet
+                </a>
+                <a href="contact-us.html" class="bg-transparent border-2 border-white text-white hover:bg-white hover:text-primary-600 px-8 py-3 rounded-md font-semibold transition">
+                    Contact Us
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="contact" class="bg-gray-800 text-white py-16">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center mr-3"><i class="fas fa-road text-white"></i></div>
+                        <div><h3 class="text-xl font-bold">VehicleRent Pro SL</h3></div>
+                    </div>
+                    <p class="text-gray-400 mb-4">Your reliable partner for vehicle rentals across Sri Lanka. Explore with confidence.</p>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Quick Links</h4>
+                    <ul class="space-y-2">
+                        <li><a href="index.html" class="text-gray-400 hover:text-white transition">Home</a></li>
+                        <li><a href="vehicles.html" class="text-gray-400 hover:text-white transition">Vehicles</a></li>
+                        <li><a href="about-us.html" class="text-gray-400 hover:text-white transition">About Us</a></li>
+                        <li><a href="contact-us.html" class="text-gray-400 hover:text-white transition">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Vehicle Types</h4>
+                    <ul class="space-y-2">
+                        <li><a href="vehicles.html?category=budget" class="text-gray-400 hover:text-white transition">Budget Cars</a></li>
+                        <li><a href="vehicles.html?category=sedan" class="text-gray-400 hover:text-white transition">Sedans & Hatchbacks</a></li>
+                        <li><a href="vehicles.html?category=suv" class="text-gray-400 hover:text-white transition">SUVs & 4x4s</a></li>
+                        <li><a href="vehicles.html?category=van" class="text-gray-400 hover:text-white transition">Vans & Minibuses</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Contact Us (Sri Lanka)</h4>
+                    <div class="space-y-2 text-gray-400">
+                        <p><i class="fas fa-phone mr-2"></i> +94 77 123 4567</p>
+                        <p><i class="fas fa-envelope mr-2"></i> support.lk@vehiclerentpro.com</p>
+                        <p><i class="fas fa-map-marker-alt mr-2"></i> 123 Galle Road, Colombo 03, Sri Lanka</p>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 pt-8 text-center text-gray-400">
+                <p>&copy; <span id="current-year"></span> VehicleRent Pro Sri Lanka. All rights reserved.</p>
+                <p class="mt-1 text-sm">Powered by Firebase. Designed for Sri Lanka.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script type="module" src="assets/js/about.js"></script>
+    <script>
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+        
+        function toggleMobileSubmenu() {
+            const submenu = document.getElementById('mobile-submenu');
+            submenu.classList.toggle('hidden');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - VehicleRent Pro Sri Lanka</title>
+    
+    <meta name="description" content="Get in touch with VehicleRent Pro Sri Lanka. Contact our team for inquiries, support, or to book your next vehicle rental in Sri Lanka.">
+    <meta name="keywords" content="contact vehicle rental sri lanka, car hire contact, rent a car sri lanka contact">
+    
+    <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <link href="assets/css/style.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="fixed inset-0 bg-white z-50 flex items-center justify-center">
+        <div class="text-center">
+            <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-primary-600 mx-auto mb-4"></div>
+            <h3 class="text-lg font-medium text-gray-900">Loading VehicleRent Pro...</h3>
+            <p class="text-sm text-gray-600 mt-2">Please wait</p>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md sticky top-0 z-40" id="main-nav">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-3">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-road text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-800">VehicleRent Pro</h1>
+                        <p class="text-xs text-gray-500">Sri Lanka</p>
+                    </div>
+                </div>
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="index.html" class="text-gray-600 hover:text-primary-600 transition font-medium">Home</a>
+                    <div class="relative group">
+                        <button class="text-gray-600 hover:text-primary-600 transition font-medium flex items-center">
+                            Vehicles <i class="fas fa-chevron-down ml-1 text-xs"></i>
+                        </button>
+                        <div class="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg border hidden group-hover:block">
+                            <div class="py-1">
+                                <a href="vehicles.html?category=budget" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Budget Cars</a>
+                                <a href="vehicles.html?category=sedan" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Sedans</a>
+                                <a href="vehicles.html?category=suv" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">SUVs & Jeeps</a>
+                                <a href="vehicles.html?category=van" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Vans</a>
+                                <a href="vehicles.html?category=luxury" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Luxury Cars</a>
+                                <div class="border-t border-gray-100 my-1"></div>
+                                <a href="vehicles.html" class="block px-4 py-2 text-sm text-primary-600 hover:bg-gray-100">View All Vehicles</a>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="about-us.html" class="text-gray-600 hover:text-primary-600 transition font-medium">About Us</a>
+                    <a href="contact-us.html" class="text-primary-600 hover:text-primary-700 transition font-medium">Contact</a>
+                </div>
+                <div class="auth-buttons flex items-center space-x-3">
+                    <button id="login-btn" class="text-gray-600 hover:text-primary-600 transition font-medium">
+                        <i class="fas fa-sign-in-alt mr-1"></i>Login
+                    </button>
+                    <button id="register-btn" class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-md transition font-semibold text-sm">
+                        <i class="fas fa-user-plus mr-1"></i>Sign Up
+                    </button>
+                </div>
+                <div class="user-menu hidden relative">
+                    <button id="user-menu-btn" class="flex items-center space-x-3 text-gray-700 hover:text-primary-600 transition">
+                        <img id="user-avatar" src="/placeholder.svg?width=32&height=32&text=User" alt="User Avatar" class="w-8 h-8 rounded-full">
+                        <span id="user-name" class="user-name font-medium">User Name</span>
+                        <i class="fas fa-chevron-down text-xs"></i>
+                    </button>
+                    <div id="user-dropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border hidden py-1">
+                        <a href="#" id="dashboard-link" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"><i class="fas fa-tachometer-alt mr-2"></i>Dashboard</a>
+                        <a href="#" id="profile-link" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"><i class="fas fa-user mr-2"></i>Profile</a>
+                        <a href="#" id="bookings-link" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"><i class="fas fa-calendar-alt mr-2"></i>My Bookings</a>
+                        <div class="border-t border-gray-100 my-1"></div>
+                        <button id="logout-btn" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"><i class="fas fa-sign-out-alt mr-2"></i>Logout</button>
+                    </div>
+                </div>
+                <button id="mobile-menu-btn" class="md:hidden text-gray-700"><i class="fas fa-bars text-xl"></i></button>
+            </div>
+        </div>
+        <div id="mobile-menu" class="md:hidden bg-white border-t hidden">
+            <div class="px-4 py-2 space-y-2">
+                <a href="index.html" class="block py-2 text-gray-700 hover:text-primary-600 transition">Home</a>
+                <div class="py-2">
+                    <button class="flex items-center justify-between w-full text-gray-700 hover:text-primary-600 transition" onclick="toggleMobileSubmenu()">
+                        Vehicles <i class="fas fa-chevron-down ml-1 text-xs"></i>
+                    </button>
+                    <div id="mobile-submenu" class="hidden pl-4 mt-2 space-y-2">
+                        <a href="vehicles.html?category=budget" class="block py-2 text-gray-700 hover:text-primary-600 transition">Budget Cars</a>
+                        <a href="vehicles.html?category=sedan" class="block py-2 text-gray-700 hover:text-primary-600 transition">Sedans</a>
+                        <a href="vehicles.html?category=suv" class="block py-2 text-gray-700 hover:text-primary-600 transition">SUVs & Jeeps</a>
+                        <a href="vehicles.html?category=van" class="block py-2 text-gray-700 hover:text-primary-600 transition">Vans</a>
+                        <a href="vehicles.html?category=luxury" class="block py-2 text-gray-700 hover:text-primary-600 transition">Luxury Cars</a>
+                        <a href="vehicles.html" class="block py-2 text-primary-600 hover:text-primary-700 transition">View All Vehicles</a>
+                    </div>
+                </div>
+                <a href="about-us.html" class="block py-2 text-gray-700 hover:text-primary-600 transition">About Us</a>
+                <a href="contact-us.html" class="block py-2 text-primary-600 hover:text-primary-700 transition">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="bg-gradient-to-r from-primary-600 to-primary-800 text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div>
+                    <h1 class="text-3xl md:text-4xl font-bold mb-2">Contact Us</h1>
+                    <p class="text-primary-100">Get in touch with our team for inquiries or support</p>
+                </div>
+                <div class="mt-4 md:mt-0">
+                    <nav class="flex" aria-label="Breadcrumb">
+                        <ol class="flex items-center space-x-2">
+                            <li><a href="index.html" class="text-primary-100 hover:text-white">Home</a></li>
+                            <li class="flex items-center">
+                                <i class="fas fa-chevron-right text-primary-300 mx-2 text-xs"></i>
+                                <span class="text-white">Contact</span>
+                            </li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Information Section -->
+    <section class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="text-center p-6 border border-gray-200 rounded-lg" data-aos="fade-up" data-aos-delay="100">
+                    <div class="w-16 h-16 bg-primary-100 text-primary-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-map-marker-alt text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Our Location</h3>
+                    <p class="text-gray-600">
+                        123 Galle Road<br>
+                        Colombo 03<br>
+                        Sri Lanka
+                    </p>
+                </div>
+                <div class="text-center p-6 border border-gray-200 rounded-lg" data-aos="fade-up" data-aos-delay="200">
+                    <div class="w-16 h-16 bg-primary-100 text-primary-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-phone-alt text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Phone Numbers</h3>
+                    <p class="text-gray-600">
+                        Customer Support: +94 77 123 4567<br>
+                        Reservations: +94 11 234 5678<br>
+                        Emergency: +94 76 987 6543
+                    </p>
+                </div>
+                <div class="text-center p-6 border border-gray-200 rounded-lg" data-aos="fade-up" data-aos-delay="300">
+                    <div class="w-16 h-16 bg-primary-100 text-primary-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-envelope text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Email Addresses</h3>
+                    <p class="text-gray-600">
+                        General Inquiries: info.lk@vehiclerentpro.com<br>
+                        Reservations: bookings.lk@vehiclerentpro.com<br>
+                        Support: support.lk@vehiclerentpro.com
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Form Section -->
+    <section class="py-16 bg-gray-100">
+        <div class="container mx-auto px-4">
+            <div class="max-w-4xl mx-auto">
+                <div class="text-center mb-12" data-aos="fade-up">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-3">Send Us a Message</h2>
+                    <p class="text-lg text-gray-600">
+                        Have questions or need assistance? Fill out the form below and we'll get back to you as soon as possible.
+                    </p>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-8" data-aos="fade-up" data-aos-delay="100">
+                    <form id="contact-form" class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                                <input type="text" id="name" name="name" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500" required>
+                            </div>
+                            <div>
+                                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                                <input type="email" id="email" name="email" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500" required>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                                <input type="tel" id="phone" name="phone" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                            </div>
+                            <div>
+                                <label for="subject" class="block text-sm font-medium text-gray-700 mb-1">Subject</label>
+                                <select id="subject" name="subject" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500" required>
+                                    <option value="">Select a subject</option>
+                                    <option value="reservation">Reservation Inquiry</option>
+                                    <option value="support">Customer Support</option>
+                                    <option value="feedback">Feedback</option>
+                                    <option value="partnership">Business Partnership</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="message" class="block text-sm font-medium text-gray-700 mb-1">Message</label>
+                            <textarea id="message" name="message" rows="5" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500" required></textarea>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="checkbox" id="privacy" name="privacy" class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded" required>
+                            <label for="privacy" class="ml-2 block text-sm text-gray-700">
+                                I agree to the <a href="#" class="text-primary-600 hover:underline">Privacy Policy</a> and consent to being contacted regarding my inquiry.
+                            </label>
+                        </div>
+                        <div>
+                            <button type="submit" id="submit-btn" class="w-full bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 rounded-md transition font-medium">
+                                <i class="fas fa-paper-plane mr-2"></i>Send Message
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Map Section -->
+    <section class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12" data-aos="fade-up">
+                <h2 class="text-3xl font-bold text-gray-800 mb-3">Find Us</h2>
+                <p class="text-lg text-gray-600">
+                    Visit our main office in Colombo or one of our branch locations across Sri Lanka
+                </p>
+            </div>
+            <div class="rounded-lg overflow-hidden shadow-md" data-aos="fade-up" data-aos-delay="100">
+                <!-- Replace with actual Google Maps embed code -->
+                <div class="bg-gray-200 w-full h-96 flex items-center justify-center">
+                    <div class="text-center">
+                        <i class="fas fa-map-marked-alt text-4xl text-gray-400 mb-4"></i>
+                        <p class="text-gray-600">Google Maps will be embedded here</p>
+                        <p class="text-sm text-gray-500 mt-2">Showing our location at 123 Galle Road, Colombo 03, Sri Lanka</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Branch Locations Section -->
+    <section class="py-16 bg-gray-100">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12" data-aos="fade-up">
+                <h2 class="text-3xl font-bold text-gray-800 mb-3">Our Branch Locations</h2>
+                <p class="text-lg text-gray-600">
+                    We have branches across Sri Lanka for your convenience
+                </p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-white p-6 rounded-lg shadow-md" data-aos="fade-up" data-aos-delay="100">
+                    <h3 class="text-xl font-semibold mb-2">Colombo (Main Office)</h3>
+                    <p class="text-gray-600 mb-4">
+                        123 Galle Road<br>
+                        Colombo 03<br>
+                        Sri Lanka
+                    </p>
+                    <p class="text-gray-600">
+                        <i class="fas fa-phone-alt text-primary-600 mr-2"></i> +94 11 234 5678
+                    </p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md" data-aos="fade-up" data-aos-delay="200">
+                    <h3 class="text-xl font-semibold mb-2">Kandy</h3>
+                    <p class="text-gray-600 mb-4">
+                        45 Peradeniya Road<br>
+                        Kandy<br>
+                        Sri Lanka
+                    </p>
+                    <p class="text-gray-600">
+                        <i class="fas fa-phone-alt text-primary-600 mr-2"></i> +94 81 234 5678
+                    </p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md" data-aos="fade-up" data-aos-delay="300">
+                    <h3 class="text-xl font-semibold mb-2">Galle</h3>
+                    <p class="text-gray-600 mb-4">
+                        78 Lighthouse Street<br>
+                        Galle Fort<br>
+                        Sri Lanka
+                    </p>
+                    <p class="text-gray-600">
+                        <i class="fas fa-phone-alt text-primary-600 mr-2"></i> +94 91 234 5678
+                    </p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md" data-aos="fade-up" data-aos-delay="400">
+                    <h3 class="text-xl font-semibold mb-2">Negombo</h3>
+                    <p class="text-gray-600 mb-4">
+                        56 Airport Road<br>
+                        Negombo<br>
+                        Sri Lanka
+                    </p>
+                    <p class="text-gray-600">
+                        <i class="fas fa-phone-alt text-primary-600 mr-2"></i> +94 31 234 5678
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12" data-aos="fade-up">
+                <h2 class="text-3xl font-bold text-gray-800 mb-3">Frequently Asked Questions</h2>
+                <p class="text-lg text-gray-600">
+                    Find answers to common questions about our services
+                </p>
+            </div>
+            <div class="max-w-3xl mx-auto" data-aos="fade-up" data-aos-delay="100">
+                <div class="space-y-4">
+                    <div class="border border-gray-200 rounded-lg overflow-hidden">
+                        <button class="faq-question w-full flex justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition">
+                            <span class="font-medium text-gray-800">What documents do I need to rent a vehicle?</span>
+                            <i class="fas fa-chevron-down text-gray-500 transition-transform"></i>
+                        </button>
+                        <div class="faq-answer p-4 border-t border-gray-200 hidden">
+                            <p class="text-gray-600">
+                                To rent a vehicle in Sri Lanka, you'll need a valid driver's license (international driving permit for non-Sri Lankan licenses), passport or national ID card, and a credit card for the security deposit. Additional documentation may be required for specific vehicle types.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="border border-gray-200 rounded-lg overflow-hidden">
+                        <button class="faq-question w-full flex justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition">
+                            <span class="font-medium text-gray-800">What is your cancellation policy?</span>
+                            <i class="fas fa-chevron-down text-gray-500 transition-transform"></i>
+                        </button>
+                        <div class="faq-answer p-4 border-t border-gray-200 hidden">
+                            <p class="text-gray-600">
+                                Cancellations made at least 48 hours before the scheduled pickup time receive a full refund. Cancellations within 24-48 hours receive a 50% refund. Cancellations less than 24 hours before pickup or no-shows are not eligible for a refund. Special terms may apply for long-term rentals.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="border border-gray-200 rounded-lg overflow-hidden">
+                        <button class="faq-question w-full flex justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition">
+                            <span class="font-medium text-gray-800">Do you offer airport pickup and drop-off?</span>
+                            <i class="fas fa-chevron-down text-gray-500 transition-transform"></i>
+                        </button>
+                        <div class="faq-answer p-4 border-t border-gray-200 hidden">
+                            <p class="text-gray-600">
+                                Yes, we offer pickup and drop-off services at Bandaranaike International Airport (CMB) and Mattala Rajapaksa International Airport (HRI). Airport transfers can be arranged during the booking process for an additional fee. Our representative will meet you at the arrivals area with your vehicle.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="border border-gray-200 rounded-lg overflow-hidden">
+                        <button class="faq-question w-full flex justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition">
+                            <span class="font-medium text-gray-800">What is included in the rental price?</span>
+                            <i class="fas fa-chevron-down text-gray-500 transition-transform"></i>
+                        </button>
+                        <div class="faq-answer p-4 border-t border-gray-200 hidden">
+                            <p class="text-gray-600">
+                                Our standard rental price includes the vehicle rental, basic insurance coverage, 24/7 roadside assistance, and unlimited mileage for most vehicles. Additional services such as GPS navigation, child seats, additional drivers, and premium insurance coverage are available for an extra charge.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="border border-gray-200 rounded-lg overflow-hidden">
+                        <button class="faq-question w-full flex justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition">
+                            <span class="font-medium text-gray-800">Can I rent a vehicle with a driver?</span>
+                            <i class="fas fa-chevron-down text-gray-500 transition-transform"></i>
+                        </button>
+                        <div class="faq-answer p-4 border-t border-gray-200 hidden">
+                            <p class="text-gray-600">
+                                Yes, we offer chauffeur-driven services for all our vehicles. Our drivers are experienced, professional, and knowledgeable about Sri Lanka's roads and attractions. This option is popular for tourists who want to explore the country without the stress of driving in unfamiliar territory.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="contact" class="bg-gray-800 text-white py-16">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center mr-3"><i class="fas fa-road text-white"></i></div>
+                        <div><h3 class="text-xl font-bold">VehicleRent Pro SL</h3></div>
+                    </div>
+                    <p class="text-gray-400 mb-4">Your reliable partner for vehicle rentals across Sri Lanka. Explore with confidence.</p>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Quick Links</h4>
+                    <ul class="space-y-2">
+                        <li><a href="index.html" class="text-gray-400 hover:text-white transition">Home</a></li>
+                        <li><a href="vehicles.html" class="text-gray-400 hover:text-white transition">Vehicles</a></li>
+                        <li><a href="about-us.html" class="text-gray-400 hover:text-white transition">About Us</a></li>
+                        <li><a href="contact-us.html" class="text-gray-400 hover:text-white transition">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Vehicle Types</h4>
+                    <ul class="space-y-2">
+                        <li><a href="vehicles.html?category=budget" class="text-gray-400 hover:text-white transition">Budget Cars</a></li>
+                        <li><a href="vehicles.html?category=sedan" class="text-gray-400 hover:text-white transition">Sedans & Hatchbacks</a></li>
+                        <li><a href="vehicles.html?category=suv" class="text-gray-400 hover:text-white transition">SUVs & 4x4s</a></li>
+                        <li><a href="vehicles.html?category=van" class="text-gray-400 hover:text-white transition">Vans & Minibuses</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Contact Us (Sri Lanka)</h4>
+                    <div class="space-y-2 text-gray-400">
+                        <p><i class="fas fa-phone mr-2"></i> +94 77 123 4567</p>
+                        <p><i class="fas fa-envelope mr-2"></i> support.lk@vehiclerentpro.com</p>
+                        <p><i class="fas fa-map-marker-alt mr-2"></i> 123 Galle Road, Colombo 03, Sri Lanka</p>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 pt-8 text-center text-gray-400">
+                <p>&copy; <span id="current-year"></span> VehicleRent Pro Sri Lanka. All rights reserved.</p>
+                <p class="mt-1 text-sm">Powered by Firebase. Designed for Sri Lanka.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script type="module" src="assets/js/contact.js"></script>
+    <script>
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+        
+        function toggleMobileSubmenu() {
+            const submenu = document.getElementById('mobile-submenu');
+            submenu.classList.toggle('hidden');
+        }
+        
+        // FAQ Accordion
+        document.addEventListener('DOMContentLoaded', function() {
+            const faqQuestions = document.querySelectorAll('.faq-question');
+            
+            faqQuestions.forEach(question => {
+                question.addEventListener('click', () => {
+                    const answer = question.nextElementSibling;
+                    const icon = question.querySelector('i');
+                    
+                    // Toggle the current answer
+                    answer.classList.toggle('hidden');
+                    icon.classList.toggle('rotate-180');
+                    
+                    // Close other answers
+                    faqQuestions.forEach(q => {
+                        if (q !== question) {
+                            const a = q.nextElementSibling;
+                            const i = q.querySelector('i');
+                            a.classList.add('hidden');
+                            i.classList.remove('rotate-180');
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>

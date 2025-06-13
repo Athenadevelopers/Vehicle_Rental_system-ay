@@ -3,31 +3,123 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VehicleRent Pro Sri Lanka - Premium Vehicle Rentals</title>
+    <title>VehicleRent Pro Sri Lanka - Premium Vehicle Rental Service</title>
     
-    <meta name="description" content="Rent cars, vans, and SUVs across Sri Lanka. Best rates, easy booking, and reliable service with VehicleRent Pro.">
-    <meta name="keywords" content="vehicle rental sri lanka, car rental colombo, rent a car sri lanka, van rental sri lanka, suv rental sri lanka">
-    <meta name="author" content="VehicleRent Pro Sri Lanka">
+    <meta name="description" content="VehicleRent Pro Sri Lanka offers premium vehicle rental services across the island. Choose from our diverse fleet of cars, vans, SUVs, and luxury vehicles.">
+    <meta name="keywords" content="vehicle rental sri lanka, car hire colombo, rent a car sri lanka, van rental sri lanka">
     
     <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
-    
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     
-    <link href="assets/css/style.css" rel="stylesheet">
     <style>
-        .hero-bg {
-            background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('/placeholder.svg?width=1200&height=800&text=Scenic+Sri+Lankan+Road');
+        :root {
+            --primary-50: #f0f9ff;
+            --primary-100: #e0f2fe;
+            --primary-200: #bae6fd;
+            --primary-300: #7dd3fc;
+            --primary-400: #38bdf8;
+            --primary-500: #0ea5e9;
+            --primary-600: #0284c7;
+            --primary-700: #0369a1;
+            --primary-800: #075985;
+            --primary-900: #0c4a6e;
+        }
+        
+        .bg-primary-50 { background-color: var(--primary-50); }
+        .bg-primary-100 { background-color: var(--primary-100); }
+        .bg-primary-200 { background-color: var(--primary-200); }
+        .bg-primary-300 { background-color: var(--primary-300); }
+        .bg-primary-400 { background-color: var(--primary-400); }
+        .bg-primary-500 { background-color: var(--primary-500); }
+        .bg-primary-600 { background-color: var(--primary-600); }
+        .bg-primary-700 { background-color: var(--primary-700); }
+        .bg-primary-800 { background-color: var(--primary-800); }
+        .bg-primary-900 { background-color: var(--primary-900); }
+        
+        .text-primary-50 { color: var(--primary-50); }
+        .text-primary-100 { color: var(--primary-100); }
+        .text-primary-200 { color: var(--primary-200); }
+        .text-primary-300 { color: var(--primary-300); }
+        .text-primary-400 { color: var(--primary-400); }
+        .text-primary-500 { color: var(--primary-500); }
+        .text-primary-600 { color: var(--primary-600); }
+        .text-primary-700 { color: var(--primary-700); }
+        .text-primary-800 { color: var(--primary-800); }
+        .text-primary-900 { color: var(--primary-900); }
+        
+        .border-primary-500 { border-color: var(--primary-500); }
+        .border-primary-600 { border-color: var(--primary-600); }
+        
+        .hover\:bg-primary-700:hover { background-color: var(--primary-700); }
+        .hover\:text-primary-600:hover { color: var(--primary-600); }
+        .hover\:text-primary-700:hover { color: var(--primary-700); }
+        
+        .focus\:ring-primary-500:focus { --tw-ring-color: var(--primary-500); }
+        .focus\:border-primary-500:focus { border-color: var(--primary-500); }
+        
+        /* Custom styles */
+        .hero-section {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/placeholder.svg?width=1920&height=1080&text=Sri+Lanka+Road+Trip');
             background-size: cover;
             background-position: center;
+            min-height: 600px;
         }
-        .feature-icon-bg {
-            background-color: var(--primary-100);
-            color: var(--primary-600);
+        
+        .search-form {
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(5px);
         }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .vehicle-card {
+            transition: all 0.3s ease;
+        }
+        
+        .vehicle-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        
         .testimonial-card {
-            background-color: #f9fafb; /* Light gray for contrast */
+            transition: all 0.3s ease;
+        }
+        
+        .testimonial-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        /* Price tag */
+        .price-tag {
+            position: relative;
+            background: var(--primary-600);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+        
+        .price-tag:after {
+            content: '';
+            position: absolute;
+            right: -8px;
+            top: 50%;
+            transform: translateY(-50%);
+            border-left: 8px solid var(--primary-600);
+            border-top: 8px solid transparent;
+            border-bottom: 8px solid transparent;
+        }
+        
+        /* Currency symbol */
+        .currency-lkr:before {
+            content: 'රු ';
+            font-size: 0.9em;
+            vertical-align: top;
         }
     </style>
 </head>
@@ -37,7 +129,7 @@
         <div class="text-center">
             <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-primary-600 mx-auto mb-4"></div>
             <h3 class="text-lg font-medium text-gray-900">Loading VehicleRent Pro...</h3>
-            <p class="text-sm text-gray-600 mt-2">Initializing services for Sri Lanka</p>
+            <p class="text-sm text-gray-600 mt-2">Please wait</p>
         </div>
     </div>
 
@@ -55,11 +147,25 @@
                     </div>
                 </div>
                 <div class="hidden md:flex items-center space-x-6">
-                    <a href="#home" class="text-gray-600 hover:text-primary-600 transition font-medium">Home</a>
-                    <a href="#services" class="text-gray-600 hover:text-primary-600 transition font-medium">Our Services</a>
-                    <a href="#vehicles" class="text-gray-600 hover:text-primary-600 transition font-medium">Vehicles</a>
-                    <a href="#why-us" class="text-gray-600 hover:text-primary-600 transition font-medium">Why Us</a>
-                    <a href="#contact" class="text-gray-600 hover:text-primary-600 transition font-medium">Contact</a>
+                    <a href="index.html" class="text-primary-600 hover:text-primary-700 transition font-medium">Home</a>
+                    <div class="relative group">
+                        <button class="text-gray-600 hover:text-primary-600 transition font-medium flex items-center">
+                            Vehicles <i class="fas fa-chevron-down ml-1 text-xs"></i>
+                        </button>
+                        <div class="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg border hidden group-hover:block">
+                            <div class="py-1">
+                                <a href="vehicles.html?category=budget" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Budget Cars</a>
+                                <a href="vehicles.html?category=sedan" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Sedans</a>
+                                <a href="vehicles.html?category=suv" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">SUVs & Jeeps</a>
+                                <a href="vehicles.html?category=van" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Vans</a>
+                                <a href="vehicles.html?category=luxury" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Luxury Cars</a>
+                                <div class="border-t border-gray-100 my-1"></div>
+                                <a href="vehicles.html" class="block px-4 py-2 text-sm text-primary-600 hover:bg-gray-100">View All Vehicles</a>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="about-us.html" class="text-gray-600 hover:text-primary-600 transition font-medium">About Us</a>
+                    <a href="contact-us.html" class="text-gray-600 hover:text-primary-600 transition font-medium">Contact</a>
                 </div>
                 <div class="auth-buttons flex items-center space-x-3">
                     <button id="login-btn" class="text-gray-600 hover:text-primary-600 transition font-medium">
@@ -86,147 +192,318 @@
                 <button id="mobile-menu-btn" class="md:hidden text-gray-700"><i class="fas fa-bars text-xl"></i></button>
             </div>
         </div>
-        <div id="mobile-menu" class="md:hidden bg-white border-t hidden"><div class="px-4 py-2 space-y-2">
-            <a href="#home" class="block py-2 text-gray-700 hover:text-primary-600 transition">Home</a>
-            <a href="#services" class="block py-2 text-gray-700 hover:text-primary-600 transition">Our Services</a>
-            <a href="#vehicles" class="block py-2 text-gray-700 hover:text-primary-600 transition">Vehicles</a>
-            <a href="#why-us" class="block py-2 text-gray-700 hover:text-primary-600 transition">Why Us</a>
-            <a href="#contact" class="block py-2 text-gray-700 hover:text-primary-600 transition">Contact</a>
-        </div></div>
+        <div id="mobile-menu" class="md:hidden bg-white border-t hidden">
+            <div class="px-4 py-2 space-y-2">
+                <a href="index.html" class="block py-2 text-primary-600 hover:text-primary-700 transition">Home</a>
+                <div class="py-2">
+                    <button class="flex items-center justify-between w-full text-gray-700 hover:text-primary-600 transition" onclick="toggleMobileSubmenu()">
+                        Vehicles <i class="fas fa-chevron-down ml-1 text-xs"></i>
+                    </button>
+                    <div id="mobile-submenu" class="hidden pl-4 mt-2 space-y-2">
+                        <a href="vehicles.html?category=budget" class="block py-2 text-gray-700 hover:text-primary-600 transition">Budget Cars</a>
+                        <a href="vehicles.html?category=sedan" class="block py-2 text-gray-700 hover:text-primary-600 transition">Sedans</a>
+                        <a href="vehicles.html?category=suv" class="block py-2 text-gray-700 hover:text-primary-600 transition">SUVs & Jeeps</a>
+                        <a href="vehicles.html?category=van" class="block py-2 text-gray-700 hover:text-primary-600 transition">Vans</a>
+                        <a href="vehicles.html?category=luxury" class="block py-2 text-gray-700 hover:text-primary-600 transition">Luxury Cars</a>
+                        <a href="vehicles.html" class="block py-2 text-primary-600 hover:text-primary-700 transition">View All Vehicles</a>
+                    </div>
+                </div>
+                <a href="about-us.html" class="block py-2 text-gray-700 hover:text-primary-600 transition">About Us</a>
+                <a href="contact-us.html" class="block py-2 text-gray-700 hover:text-primary-600 transition">Contact</a>
+            </div>
+        </div>
     </nav>
 
     <!-- Hero Section -->
-    <section id="home" class="hero-bg text-white py-24 md:py-32">
-        <div class="container mx-auto px-4 text-center">
-            <div data-aos="fade-up">
-                <h1 class="text-4xl md:text-6xl font-bold mb-6 leading-tight">Explore Sri Lanka Your Way</h1>
-                <p class="text-lg md:text-xl mb-10 text-gray-200 max-w-2xl mx-auto">
-                    Reliable and affordable vehicle rentals for your adventures across the beautiful island of Sri Lanka.
-                </p>
-                <a href="#vehicles" class="bg-primary-600 hover:bg-primary-700 text-white px-10 py-4 rounded-lg font-semibold text-lg transition transform hover:scale-105 inline-block">
-                    <i class="fas fa-search mr-2"></i>Find Your Ride
+    <section class="hero-section flex items-center justify-center relative">
+        <div class="container mx-auto px-4 py-16 md:py-24 text-center text-white">
+            <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-4" data-aos="fade-up">Explore Sri Lanka With Confidence</h1>
+            <p class="text-xl md:text-2xl mb-8 max-w-3xl mx-auto" data-aos="fade-up" data-aos-delay="100">Premium vehicle rental services across the island at competitive prices</p>
+            <div class="flex flex-col sm:flex-row justify-center gap-4 mb-12" data-aos="fade-up" data-aos-delay="200">
+                <a href="vehicles.html" class="bg-primary-600 hover:bg-primary-700 text-white px-8 py-3 rounded-md font-semibold transition">
+                    Browse Our Fleet
                 </a>
+                <a href="#search-form" class="bg-white text-primary-600 hover:bg-gray-100 px-8 py-3 rounded-md font-semibold transition">
+                    Book Now
+                </a>
+            </div>
+        </div>
+        
+        <!-- Search Form -->
+        <div id="search-form" class="absolute bottom-0 left-0 right-0 transform translate-y-1/2">
+            <div class="container mx-auto px-4">
+                <form class="search-form rounded-lg shadow-lg p-6 md:p-8" data-aos="fade-up" data-aos-delay="300">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6">
+                        <div>
+                            <label for="pickup-location" class="block text-sm font-medium text-gray-700 mb-1">Pickup Location</label>
+                            <div class="relative">
+                                <input type="text" id="pickup-location" name="pickup-location" class="w-full border border-gray-300 rounded-md pl-10 pr-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500" placeholder="Enter pickup location">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-map-marker-alt text-gray-400"></i>
+                                </div>
+                                <button type="button" id="use-my-location" class="absolute inset-y-0 right-0 pr-3 flex items-center text-primary-600 hover:text-primary-700">
+                                    <i class="fas fa-location-arrow"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="vehicle-type" class="block text-sm font-medium text-gray-700 mb-1">Vehicle Type</label>
+                            <div class="relative">
+                                <select id="vehicle-type" name="vehicle-type" class="w-full border border-gray-300 rounded-md pl-10 pr-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 appearance-none">
+                                    <option value="">Any Vehicle Type</option>
+                                    <option value="budget">Budget Cars</option>
+                                    <option value="sedan">Sedans</option>
+                                    <option value="suv">SUVs & Jeeps</option>
+                                    <option value="van">Vans</option>
+                                    <option value="luxury">Luxury Cars</option>
+                                </select>
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-car text-gray-400"></i>
+                                </div>
+                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-chevron-down text-gray-400"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="pickup-date" class="block text-sm font-medium text-gray-700 mb-1">Pickup Date</label>
+                            <div class="relative">
+                                <input type="date" id="pickup-date" name="pickup-date" class="w-full border border-gray-300 rounded-md pl-10 pr-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-calendar-alt text-gray-400"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="return-date" class="block text-sm font-medium text-gray-700 mb-1">Return Date</label>
+                            <div class="relative">
+                                <input type="date" id="return-date" name="return-date" class="w-full border border-gray-300 rounded-md pl-10 pr-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-calendar-alt text-gray-400"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-6 text-center">
+                        <button type="submit" class="bg-primary-600 hover:bg-primary-700 text-white px-8 py-3 rounded-md font-semibold transition">
+                            <i class="fas fa-search mr-2"></i>Find Available Vehicles
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-24 mt-16 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16" data-aos="fade-up">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">Why Choose VehicleRent Pro Sri Lanka?</h2>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+                    We offer the best vehicle rental experience in Sri Lanka with our premium fleet and exceptional service
+                </p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div class="feature-card p-6 bg-white rounded-lg shadow-md border border-gray-100 transition duration-300" data-aos="fade-up" data-aos-delay="100">
+                    <div class="w-16 h-16 bg-primary-100 text-primary-600 rounded-full flex items-center justify-center mb-6">
+                        <i class="fas fa-car-side text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">Diverse Fleet</h3>
+                    <p class="text-gray-600">
+                        From budget-friendly hatchbacks to luxury sedans and spacious vans, we have the perfect vehicle for every need and budget.
+                    </p>
+                </div>
+                <div class="feature-card p-6 bg-white rounded-lg shadow-md border border-gray-100 transition duration-300" data-aos="fade-up" data-aos-delay="200">
+                    <div class="w-16 h-16 bg-primary-100 text-primary-600 rounded-full flex items-center justify-center mb-6">
+                        <i class="fas fa-map-marked-alt text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">Island-wide Coverage</h3>
+                    <p class="text-gray-600">
+                        With pickup and drop-off locations across Sri Lanka, we make it convenient to start your journey from anywhere on the island.
+                    </p>
+                </div>
+                <div class="feature-card p-6 bg-white rounded-lg shadow-md border border-gray-100 transition duration-300" data-aos="fade-up" data-aos-delay="300">
+                    <div class="w-16 h-16 bg-primary-100 text-primary-600 rounded-full flex items-center justify-center mb-6">
+                        <i class="fas fa-hand-holding-usd text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">Competitive Pricing</h3>
+                    <p class="text-gray-600">
+                        Enjoy transparent pricing in Sri Lankan Rupees (LKR) with no hidden fees. We offer the best value for your money with our well-maintained vehicles.
+                    </p>
+                </div>
+                <div class="feature-card p-6 bg-white rounded-lg shadow-md border border-gray-100 transition duration-300" data-aos="fade-up" data-aos-delay="400">
+                    <div class="w-16 h-16 bg-primary-100 text-primary-600 rounded-full flex items-center justify-center mb-6">
+                        <i class="fas fa-headset text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">24/7 Support</h3>
+                    <p class="text-gray-600">
+                        Our dedicated customer support team is available around the clock to assist you with any queries or issues during your rental.
+                    </p>
+                </div>
             </div>
         </div>
     </section>
 
     <!-- How It Works Section -->
-    <section id="services" class="py-16 bg-white">
+    <section class="py-16 bg-gray-100">
         <div class="container mx-auto px-4">
-            <div class="text-center mb-12" data-aos="fade-up">
-                <h2 class="text-3xl font-bold text-gray-800 mb-3">Simple & Convenient Rentals</h2>
-                <p class="text-lg text-gray-600 max-w-xl mx-auto">Booking your perfect vehicle is just a few clicks away.</p>
+            <div class="text-center mb-16" data-aos="fade-up">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">How It Works</h2>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+                    Renting a vehicle with us is quick and easy
+                </p>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-                <div data-aos="fade-up" data-aos-delay="100">
-                    <div class="w-20 h-20 feature-icon-bg rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-search-location text-3xl"></i>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="text-center" data-aos="fade-up" data-aos-delay="100">
+                    <div class="relative">
+                        <div class="w-20 h-20 bg-primary-600 text-white rounded-full flex items-center justify-center mx-auto mb-6 text-2xl font-bold">1</div>
+                        <div class="hidden md:block absolute top-10 left-full w-full h-0.5 bg-primary-200 -z-10 transform -translate-x-10"></div>
                     </div>
-                    <h3 class="text-xl font-semibold mb-2">1. Search & Select</h3>
-                    <p class="text-gray-600">Browse our wide range of vehicles and choose the one that fits your needs.</p>
+                    <h3 class="text-xl font-semibold mb-3">Choose Your Vehicle</h3>
+                    <p class="text-gray-600">
+                        Browse our diverse fleet and select the perfect vehicle that suits your needs and budget.
+                    </p>
                 </div>
-                <div data-aos="fade-up" data-aos-delay="200">
-                    <div class="w-20 h-20 feature-icon-bg rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-calendar-check text-3xl"></i>
+                <div class="text-center" data-aos="fade-up" data-aos-delay="200">
+                    <div class="relative">
+                        <div class="w-20 h-20 bg-primary-600 text-white rounded-full flex items-center justify-center mx-auto mb-6 text-2xl font-bold">2</div>
+                        <div class="hidden md:block absolute top-10 left-full w-full h-0.5 bg-primary-200 -z-10 transform -translate-x-10"></div>
                     </div>
-                    <h3 class="text-xl font-semibold mb-2">2. Book & Confirm</h3>
-                    <p class="text-gray-600">Select your dates, provide details, and confirm your booking online.</p>
+                    <h3 class="text-xl font-semibold mb-3">Book & Confirm</h3>
+                    <p class="text-gray-600">
+                        Complete the booking process by providing your details and making a secure payment.
+                    </p>
                 </div>
-                <div data-aos="fade-up" data-aos-delay="300">
-                    <div class="w-20 h-20 feature-icon-bg rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-car-side text-3xl"></i>
-                    </div>
-                    <h3 class="text-xl font-semibold mb-2">3. Pick Up & Go</h3>
-                    <p class="text-gray-600">Collect your vehicle from a convenient location and start your journey!</p>
+                <div class="text-center" data-aos="fade-up" data-aos-delay="300">
+                    <div class="w-20 h-20 bg-primary-600 text-white rounded-full flex items-center justify-center mx-auto mb-6 text-2xl font-bold">3</div>
+                    <h3 class="text-xl font-semibold mb-3">Enjoy Your Journey</h3>
+                    <p class="text-gray-600">
+                        Pick up your vehicle at the designated location and start exploring Sri Lanka with confidence.
+                    </p>
                 </div>
-            </div>
-        </div>
-    </section>
-    
-    <!-- Popular Vehicles Section -->
-    <section id="vehicles" class="py-16 bg-gray-100">
-        <div class="container mx-auto px-4">
-            <div class="text-center mb-12" data-aos="fade-up">
-                <h2 class="text-3xl font-bold text-gray-800 mb-3">Popular Vehicles in Sri Lanka</h2>
-                <p class="text-lg text-gray-600 max-w-xl mx-auto">A diverse fleet to suit every traveler and budget.</p>
-            </div>
-            <div id="vehicles-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Vehicle cards will be dynamically inserted here by main.js -->
-                <div class="text-center py-10 col-span-full">Loading vehicles...</div>
             </div>
         </div>
     </section>
 
-    <!-- Why Choose Us Section -->
-    <section id="why-us" class="py-16 bg-white">
+    <!-- Popular Vehicles Section -->
+    <section class="py-16 bg-white">
         <div class="container mx-auto px-4">
-            <div class="text-center mb-12" data-aos="fade-up">
-                <h2 class="text-3xl font-bold text-gray-800 mb-3">Why Rent With VehicleRent Pro Sri Lanka?</h2>
-                <p class="text-lg text-gray-600 max-w-xl mx-auto">Your trusted partner for vehicle rentals in Sri Lanka.</p>
+            <div class="flex justify-between items-center mb-12">
+                <div data-aos="fade-right">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-2">Popular Vehicles</h2>
+                    <p class="text-lg text-gray-600">
+                        Explore our most popular rental options in Sri Lanka
+                    </p>
+                </div>
+                <div data-aos="fade-left">
+                    <a href="vehicles.html" class="inline-flex items-center text-primary-600 hover:text-primary-700 font-medium">
+                        View All Vehicles <i class="fas fa-arrow-right ml-2"></i>
+                    </a>
+                </div>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                <div class="p-6 rounded-lg" data-aos="fade-up" data-aos-delay="100">
-                    <div class="w-16 h-16 feature-icon-bg rounded-full flex items-center justify-center mx-auto md:mx-0 mb-4"><i class="fas fa-map-marked-alt text-2xl"></i></div>
-                    <h3 class="text-xl font-semibold mb-2">Island-Wide Coverage</h3>
-                    <p class="text-gray-600">Pick up and drop off locations across Sri Lanka, including major airports.</p>
-                </div>
-                <div class="p-6 rounded-lg" data-aos="fade-up" data-aos-delay="200">
-                    <div class="w-16 h-16 feature-icon-bg rounded-full flex items-center justify-center mx-auto md:mx-0 mb-4"><i class="fas fa-lkr text-2xl">රු</i></div> <!-- LKR symbol -->
-                    <h3 class="text-xl font-semibold mb-2">Transparent LKR Pricing</h3>
-                    <p class="text-gray-600">No hidden fees. Competitive rates in Sri Lankan Rupees.</p>
-                </div>
-                <div class="p-6 rounded-lg" data-aos="fade-up" data-aos-delay="300">
-                    <div class="w-16 h-16 feature-icon-bg rounded-full flex items-center justify-center mx-auto md:mx-0 mb-4"><i class="fas fa-shield-alt text-2xl"></i></div>
-                    <h3 class="text-xl font-semibold mb-2">Well-Maintained Fleet</h3>
-                    <p class="text-gray-600">Regularly serviced and clean vehicles for your safety and comfort.</p>
-                </div>
-                <div class="p-6 rounded-lg" data-aos="fade-up" data-aos-delay="400">
-                    <div class="w-16 h-16 feature-icon-bg rounded-full flex items-center justify-center mx-auto md:mx-0 mb-4"><i class="fas fa-headset text-2xl"></i></div>
-                    <h3 class="text-xl font-semibold mb-2">24/7 Customer Support</h3>
-                    <p class="text-gray-600">We're here to help you anytime during your rental period.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" id="popular-vehicles">
+                <!-- Popular vehicles will be dynamically inserted here -->
+                <div class="col-span-full flex justify-center py-12">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Testimonials Section -->
-    <section id="testimonials" class="py-16 bg-gray-100">
+    <section class="py-16 bg-gray-100">
         <div class="container mx-auto px-4">
             <div class="text-center mb-12" data-aos="fade-up">
-                <h2 class="text-3xl font-bold text-gray-800 mb-3">What Our Customers Say</h2>
-                <p class="text-lg text-gray-600">Real experiences from satisfied renters in Sri Lanka.</p>
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">What Our Customers Say</h2>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+                    Hear from travelers who have experienced our service across Sri Lanka
+                </p>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="testimonial-card p-6 rounded-lg shadow-sm" data-aos="fade-up" data-aos-delay="100">
-                    <p class="text-gray-700 mb-4">"Excellent service! The car was clean and perfect for our family trip around Kandy. Booking was super easy. Highly recommend VehicleRent Pro."</p>
+                <div class="testimonial-card bg-white p-6 rounded-lg shadow-md" data-aos="fade-up" data-aos-delay="100">
+                    <div class="flex items-center mb-4">
+                        <div class="text-primary-600 mr-2">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <span class="text-gray-600 text-sm">5.0</span>
+                    </div>
+                    <p class="text-gray-600 italic mb-4">
+                        "We rented a van for our family trip around Sri Lanka. The vehicle was in excellent condition, and the service was outstanding. The staff went above and beyond to accommodate our needs."
+                    </p>
                     <div class="flex items-center">
-                        <img src="/placeholder.svg?width=40&height=40&text=A" alt="Customer Avatar" class="w-10 h-10 rounded-full mr-3">
+                        <img src="/placeholder.svg?width=50&height=50&text=J" alt="John Smith" class="w-10 h-10 rounded-full mr-3">
                         <div>
-                            <p class="font-semibold text-gray-800">Anura Perera</p>
+                            <h4 class="font-semibold text-gray-800">John Smith</h4>
+                            <p class="text-sm text-gray-500">United Kingdom</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card bg-white p-6 rounded-lg shadow-md" data-aos="fade-up" data-aos-delay="200">
+                    <div class="flex items-center mb-4">
+                        <div class="text-primary-600 mr-2">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <span class="text-gray-600 text-sm">5.0</span>
+                    </div>
+                    <p class="text-gray-600 italic mb-4">
+                        "As a local business traveler, I regularly rent from VehicleRent Pro. Their prices are competitive, the vehicles are always clean, and the booking process is seamless. Highly recommended!"
+                    </p>
+                    <div class="flex items-center">
+                        <img src="/placeholder.svg?width=50&height=50&text=A" alt="Amal Perera" class="w-10 h-10 rounded-full mr-3">
+                        <div>
+                            <h4 class="font-semibold text-gray-800">Amal Perera</h4>
                             <p class="text-sm text-gray-500">Colombo, Sri Lanka</p>
                         </div>
                     </div>
                 </div>
-                <div class="testimonial-card p-6 rounded-lg shadow-sm" data-aos="fade-up" data-aos-delay="200">
-                    <p class="text-gray-700 mb-4">"Rented a van for a group tour to Ella. The vehicle was spacious and comfortable. The team was very helpful with airport pickup. Will use again!"</p>
+                <div class="testimonial-card bg-white p-6 rounded-lg shadow-md" data-aos="fade-up" data-aos-delay="300">
+                    <div class="flex items-center mb-4">
+                        <div class="text-primary-600 mr-2">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
+                        </div>
+                        <span class="text-gray-600 text-sm">4.5</span>
+                    </div>
+                    <p class="text-gray-600 italic mb-4">
+                        "We rented an SUV for our honeymoon trip around Sri Lanka. The vehicle was perfect for the varied terrain, and the customer service was exceptional. Will definitely use them again!"
+                    </p>
                     <div class="flex items-center">
-                        <img src="/placeholder.svg?width=40&height=40&text=S" alt="Customer Avatar" class="w-10 h-10 rounded-full mr-3">
+                        <img src="/placeholder.svg?width=50&height=50&text=S" alt="Sarah Johnson" class="w-10 h-10 rounded-full mr-3">
                         <div>
-                            <p class="font-semibold text-gray-800">Sarah Fernando</p>
-                            <p class="text-sm text-gray-500">Negombo, Sri Lanka</p>
+                            <h4 class="font-semibold text-gray-800">Sarah Johnson</h4>
+                            <p class="text-sm text-gray-500">Australia</p>
                         </div>
                     </div>
                 </div>
-                <div class="testimonial-card p-6 rounded-lg shadow-sm" data-aos="fade-up" data-aos-delay="300">
-                    <p class="text-gray-700 mb-4">"Best car rental experience in Sri Lanka. The rates were very competitive (in LKR!), and the car was in great condition. Made our coastal tour a breeze."</p>
-                    <div class="flex items-center">
-                        <img src="/placeholder.svg?width=40&height=40&text=R" alt="Customer Avatar" class="w-10 h-10 rounded-full mr-3">
-                        <div>
-                            <p class="font-semibold text-gray-800">Ravi Kumar</p>
-                            <p class="text-sm text-gray-500">Galle, Sri Lanka</p>
-                        </div>
-                    </div>
-                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-16 bg-primary-600 text-white">
+        <div class="container mx-auto px-4 text-center">
+            <h2 class="text-3xl font-bold mb-4" data-aos="fade-up">Ready to Explore Sri Lanka?</h2>
+            <p class="text-lg text-primary-100 mb-8 max-w-2xl mx-auto" data-aos="fade-up" data-aos-delay="100">
+                Book your vehicle today and experience the freedom to discover the beauty of Sri Lanka at your own pace.
+            </p>
+            <div class="flex flex-col sm:flex-row justify-center gap-4" data-aos="fade-up" data-aos-delay="200">
+                <a href="vehicles.html" class="bg-white text-primary-600 hover:bg-gray-100 px-8 py-3 rounded-md font-semibold transition">
+                    Browse Our Fleet
+                </a>
+                <a href="contact-us.html" class="bg-transparent border-2 border-white text-white hover:bg-white hover:text-primary-600 px-8 py-3 rounded-md font-semibold transition">
+                    Contact Us
+                </a>
             </div>
         </div>
     </section>
@@ -245,19 +522,19 @@
                 <div>
                     <h4 class="text-lg font-semibold mb-4">Quick Links</h4>
                     <ul class="space-y-2">
-                        <li><a href="#home" class="text-gray-400 hover:text-white transition">Home</a></li>
-                        <li><a href="#vehicles" class="text-gray-400 hover:text-white transition">Vehicles</a></li>
-                        <li><a href="#why-us" class="text-gray-400 hover:text-white transition">Why Us</a></li>
-                        <li><a href="/terms.html" class="text-gray-400 hover:text-white transition">Terms & Conditions</a></li>
+                        <li><a href="index.html" class="text-gray-400 hover:text-white transition">Home</a></li>
+                        <li><a href="vehicles.html" class="text-gray-400 hover:text-white transition">Vehicles</a></li>
+                        <li><a href="about-us.html" class="text-gray-400 hover:text-white transition">About Us</a></li>
+                        <li><a href="contact-us.html" class="text-gray-400 hover:text-white transition">Contact</a></li>
                     </ul>
                 </div>
                 <div>
                     <h4 class="text-lg font-semibold mb-4">Vehicle Types</h4>
                     <ul class="space-y-2">
-                        <li><a href="#vehicles" class="text-gray-400 hover:text-white transition">Economy Cars</a></li>
-                        <li><a href="#vehicles" class="text-gray-400 hover:text-white transition">Sedans & Hatchbacks</a></li>
-                        <li><a href="#vehicles" class="text-gray-400 hover:text-white transition">SUVs & 4x4s</a></li>
-                        <li><a href="#vehicles" class="text-gray-400 hover:text-white transition">Vans & Minibuses</a></li>
+                        <li><a href="vehicles.html?category=budget" class="text-gray-400 hover:text-white transition">Budget Cars</a></li>
+                        <li><a href="vehicles.html?category=sedan" class="text-gray-400 hover:text-white transition">Sedans & Hatchbacks</a></li>
+                        <li><a href="vehicles.html?category=suv" class="text-gray-400 hover:text-white transition">SUVs & 4x4s</a></li>
+                        <li><a href="vehicles.html?category=van" class="text-gray-400 hover:text-white transition">Vans & Minibuses</a></li>
                     </ul>
                 </div>
                 <div>
@@ -280,6 +557,11 @@
     <script type="module" src="assets/js/main.js"></script>
     <script>
         document.getElementById('current-year').textContent = new Date().getFullYear();
+        
+        function toggleMobileSubmenu() {
+            const submenu = document.getElementById('mobile-submenu');
+            submenu.classList.toggle('hidden');
+        }
     </script>
 </body>
 </html>

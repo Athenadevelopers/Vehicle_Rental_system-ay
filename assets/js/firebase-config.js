@@ -1,355 +1,218 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app"
-import {
-  getAuth,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signInWithPopup,
-  GoogleAuthProvider,
-  FacebookAuthProvider,
-  signOut,
-  onAuthStateChanged,
-  sendPasswordResetEmail,
-  updateProfile,
-} from "firebase/auth"
-import {
-  getFirestore,
-  doc,
-  setDoc,
-  getDoc,
-  updateDoc,
-  collection,
-  getDocs,
-  query,
-  where,
-  orderBy,
-  limit,
-  serverTimestamp,
-  enableIndexedDbPersistence,
-} from "firebase/firestore"
-import { getStorage } from "firebase/storage"
-import { getAnalytics, isSupported } from "firebase/analytics"
+// Import Firebase
+import firebase from "firebase/app"
+import "firebase/auth"
+import "firebase/firestore"
 
-// Your web app's Firebase configuration
+// Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyDzaniZd0ZJXU3Rk__wR8hjwfp8xI4_VO4",
-  authDomain: "vehicle-rental-system-20698.firebaseapp.com",
-  projectId: "vehicle-rental-system-20698",
-  storageBucket: "vehicle-rental-system-20698.firebasestorage.app",
-  messagingSenderId: "86431969601",
-  appId: "1:86431969601:web:574b2d2a212e70a5caf1c0",
+  apiKey: "YOUR_API_KEY",
+  authDomain: "your-project.firebaseapp.com",
+  projectId: "your-project",
+  storageBucket: "your-project.appspot.com",
+  messagingSenderId: "your-messaging-sender-id",
+  appId: "your-app-id",
 }
 
-// Initialize Firebase
-let app, auth, db, storage, analytics
-
-try {
-  app = initializeApp(firebaseConfig)
-
-  // Initialize Firebase services
-  auth = getAuth(app)
-  db = getFirestore(app)
-  storage = getStorage(app)
-
-  // Initialize analytics only if supported (won't run in environments without browser support)
-  isSupported()
-    .then((supported) => {
-      if (supported) {
-        analytics = getAnalytics(app)
-      }
-    })
-    .catch((err) => {
-      console.warn("Analytics not supported:", err)
-    })
-
-  // Enable offline persistence for Firestore
-  enableIndexedDbPersistence(db).catch((err) => {
-    if (err.code === "failed-precondition") {
-      console.warn("Firestore persistence failed: Multiple tabs open")
-    } else if (err.code === "unimplemented") {
-      console.warn("Firestore persistence not available in this browser")
-    }
-  })
-
-  console.log("Firebase initialized successfully")
-} catch (error) {
-  console.error("Firebase initialization error:", error)
-}
-
-// Initialize providers
-const googleProvider = new GoogleAuthProvider()
-const facebookProvider = new FacebookAuthProvider()
-
-// Configure providers
-googleProvider.setCustomParameters({
-  prompt: "select_account",
-})
-
-facebookProvider.setCustomParameters({
-  display: "popup",
-})
-
-// Firebase Database Manager
-class FirebaseDBManager {
+// Firebase Auth Manager
+class FirebaseAuthManager {
   constructor() {
-    this.collections = {
-      users: "users",
-      vehicles: "vehicles",
-      categories: "vehicle_categories",
-      bookings: "bookings",
-      payments: "payments",
-      maintenance: "maintenance_records",
-      settings: "system_settings",
-      activities: "activity_logs",
-    }
+    this.auth = null
+    this.user = null
+    this.initialized = false
   }
 
-  // Generate unique ID
-  generateId() {
-    return Date.now().toString(36) + Math.random().toString(36).substr(2)
-  }
-
-  // Generate booking number
-  generateBookingNumber() {
-    const prefix = "VR"
-    const year = new Date().getFullYear()
-    const month = String(new Date().getMonth() + 1).padStart(2, "0")
-    const random = Math.floor(Math.random() * 10000)
-      .toString()
-      .padStart(4, "0")
-    return `${prefix}${year}${month}${random}`
-  }
-
-  // Users Management
-  async createUser(userData) {
+  async initialize() {
     try {
-      if (!db) throw new Error("Firestore not initialized")
+      if (this.initialized) return { success: true }
 
-      const userRef = doc(db, this.collections.users, userData.uid)
-      const user = {
-        uid: userData.uid,
-        email: userData.email,
-        username: userData.username || this.generateUsernameFromEmail(userData.email),
-        fullName: userData.fullName || "",
-        phone: userData.phone || "",
-        address: userData.address || "",
-        role: userData.role || "customer",
-        status: "active",
-        emailVerified: userData.emailVerified || false,
-        photoURL: userData.photoURL || "",
-        authProvider: userData.authProvider || "firebase",
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-        lastLoginAt: serverTimestamp(),
-        preferences: {
-          emailNotifications: true,
-          pushNotifications: true,
-          language: "en",
-          currency: "USD",
-        },
-        stats: {
-          totalBookings: 0,
-          totalSpent: 0,
-          activeBookings: 0,
-        },
+      // Wait for Firebase to load
+      if (typeof firebase === "undefined") {
+        console.log("Waiting for Firebase to load...")
+        await new Promise((resolve) => {
+          const checkFirebase = setInterval(() => {
+            if (typeof firebase !== "undefined") {
+              clearInterval(checkFirebase)
+              resolve()
+            }
+          }, 100)
+        })
       }
 
-      await setDoc(userRef, user)
-      await this.logActivity(userData.uid, "user_created", "user", userData.uid, "User account created")
-      return { success: true, user }
-    } catch (error) {
-      console.error("Error creating user:", error)
-      return { success: false, error: error.message }
-    }
-  }
-
-  async getUser(uid) {
-    try {
-      if (!db) throw new Error("Firestore not initialized")
-
-      const userRef = doc(db, this.collections.users, uid)
-      const userSnap = await getDoc(userRef)
-
-      if (userSnap.exists()) {
-        return { success: true, user: userSnap.data() }
-      } else {
-        return { success: false, error: "User not found" }
-      }
-    } catch (error) {
-      console.error("Error getting user:", error)
-      return { success: false, error: error.message }
-    }
-  }
-
-  async updateUser(uid, userData) {
-    try {
-      if (!db) throw new Error("Firestore not initialized")
-
-      const userRef = doc(db, this.collections.users, uid)
-      const updateData = {
-        ...userData,
-        updatedAt: serverTimestamp(),
+      // Initialize Firebase if not already initialized
+      if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig)
       }
 
-      await updateDoc(userRef, updateData)
-      await this.logActivity(uid, "user_updated", "user", uid, "User profile updated")
+      this.auth = firebase.auth()
+
+      // Set up auth state change listener
+      this.auth.onAuthStateChanged((user) => {
+        this.user = user
+        this.updateUI(user)
+      })
+
+      this.initialized = true
       return { success: true }
     } catch (error) {
-      console.error("Error updating user:", error)
+      console.error("Firebase Auth initialization error:", error)
       return { success: false, error: error.message }
     }
   }
 
-  async getAllUsers(role = null, limitCount = 50) {
+  async signIn(email, password) {
     try {
-      if (!db) throw new Error("Firestore not initialized")
-
-      let q = collection(db, this.collections.users)
-
-      if (role) {
-        q = query(q, where("role", "==", role))
-      }
-
-      q = query(q, orderBy("createdAt", "desc"), limit(limitCount))
-
-      const querySnapshot = await getDocs(q)
-      const users = []
-
-      querySnapshot.forEach((doc) => {
-        users.push({ id: doc.id, ...doc.data() })
-      })
-
-      return { success: true, users }
+      if (!this.initialized) await this.initialize()
+      const result = await this.auth.signInWithEmailAndPassword(email, password)
+      return { success: true, user: result.user }
     } catch (error) {
-      console.error("Error getting users:", error)
+      console.error("Sign in error:", error)
       return { success: false, error: error.message }
     }
   }
 
-  // Vehicle Categories Management
-  async createCategory(categoryData) {
+  async signUp(email, password) {
     try {
-      if (!db) throw new Error("Firestore not initialized")
-
-      const categoryRef = doc(collection(db, this.collections.categories))
-      const category = {
-        id: categoryRef.id,
-        name: categoryData.name,
-        description: categoryData.description || "",
-        icon: categoryData.icon || "fas fa-car",
-        sortOrder: categoryData.sortOrder || 0,
-        status: "active",
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      }
-
-      await setDoc(categoryRef, category)
-      return { success: true, category }
+      if (!this.initialized) await this.initialize()
+      const result = await this.auth.createUserWithEmailAndPassword(email, password)
+      return { success: true, user: result.user }
     } catch (error) {
-      console.error("Error creating category:", error)
+      console.error("Sign up error:", error)
       return { success: false, error: error.message }
     }
   }
 
-  async getCategories() {
+  async signOut() {
     try {
-      if (!db) throw new Error("Firestore not initialized")
-
-      const q = query(
-        collection(db, this.collections.categories),
-        where("status", "==", "active"),
-        orderBy("sortOrder"),
-        orderBy("name"),
-      )
-
-      const querySnapshot = await getDocs(q)
-      const categories = []
-
-      querySnapshot.forEach((doc) => {
-        categories.push({ id: doc.id, ...doc.data() })
-      })
-
-      return { success: true, categories }
+      if (!this.initialized) await this.initialize()
+      await this.auth.signOut()
+      return { success: true }
     } catch (error) {
-      console.error("Error getting categories:", error)
+      console.error("Sign out error:", error)
       return { success: false, error: error.message }
     }
   }
 
-  // Vehicles Management
-  async createVehicle(vehicleData) {
-    try {
-      if (!db) throw new Error("Firestore not initialized")
+  getCurrentUser() {
+    return this.user
+  }
 
-      const vehicleRef = doc(collection(db, this.collections.vehicles))
-      const vehicle = {
-        id: vehicleRef.id,
-        categoryId: vehicleData.categoryId,
-        make: vehicleData.make,
-        model: vehicleData.model,
-        year: vehicleData.year,
-        licensePlate: vehicleData.licensePlate,
-        vin: vehicleData.vin || "",
-        color: vehicleData.color,
-        seats: vehicleData.seats || 4,
-        fuelType: vehicleData.fuelType || "petrol",
-        transmission: vehicleData.transmission || "manual",
-        dailyRate: vehicleData.dailyRate,
-        weeklyRate: vehicleData.weeklyRate || vehicleData.dailyRate * 6,
-        monthlyRate: vehicleData.monthlyRate || vehicleData.dailyRate * 25,
-        status: "available",
-        imageUrl: vehicleData.imageUrl || "",
-        images: vehicleData.images || [],
-        features: vehicleData.features || "",
-        mileage: vehicleData.mileage || 0,
-        lastServiceDate: vehicleData.lastServiceDate || null,
-        nextServiceDate: vehicleData.nextServiceDate || null,
-        insuranceExpiry: vehicleData.insuranceExpiry || null,
-        registrationExpiry: vehicleData.registrationExpiry || null,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-        stats: {
-          totalBookings: 0,
-          totalRevenue: 0,
-          averageRating: 0,
-          totalRatings: 0,
-        },
+  isAuthenticated() {
+    return !!this.user
+  }
+
+  updateUI(user) {
+    const authButtons = document.querySelector(".auth-buttons")
+    const userMenu = document.querySelector(".user-menu")
+
+    if (!authButtons || !userMenu) return
+
+    if (user) {
+      // User is signed in
+      authButtons.classList.add("hidden")
+      userMenu.classList.remove("hidden")
+
+      // Update user info
+      const userNameElement = document.getElementById("user-name")
+      const userAvatarElement = document.getElementById("user-avatar")
+
+      if (userNameElement) {
+        userNameElement.textContent = user.displayName || user.email || "User"
       }
 
-      await setDoc(vehicleRef, vehicle)
-      return { success: true, vehicle }
+      if (userAvatarElement) {
+        userAvatarElement.src =
+          user.photoURL ||
+          `/placeholder.svg?width=32&height=32&text=${(user.displayName || user.email || "U").charAt(0)}`
+      }
+
+      // Update dashboard link
+      const dashboardLink = document.getElementById("dashboard-link")
+      if (dashboardLink) {
+        // Check if user is admin
+        this.checkAdminRole(user.uid).then((isAdmin) => {
+          dashboardLink.href = isAdmin ? "admin/dashboard.php" : "customer/dashboard.php"
+        })
+      }
+    } else {
+      // No user is signed in
+      authButtons.classList.remove("hidden")
+      userMenu.classList.add("hidden")
+    }
+  }
+
+  async checkAdminRole(userId) {
+    try {
+      if (!this.initialized) await this.initialize()
+
+      // Get Firestore instance
+      const db = firebase.firestore()
+
+      // Check user roles in Firestore
+      const userDoc = await db.collection("users").doc(userId).get()
+
+      if (userDoc.exists) {
+        const userData = userDoc.data()
+        return userData.role === "admin"
+      }
+
+      return false
     } catch (error) {
-      console.error("Error creating vehicle:", error)
+      console.error("Error checking admin role:", error)
+      return false
+    }
+  }
+}
+
+// Firebase Database Manager
+class FirebaseDatabaseManager {
+  constructor() {
+    this.db = null
+    this.initialized = false
+  }
+
+  async initialize() {
+    try {
+      if (this.initialized) return { success: true }
+
+      // Wait for Firebase to load
+      if (typeof firebase === "undefined") {
+        console.log("Waiting for Firebase to load...")
+        await new Promise((resolve) => {
+          const checkFirebase = setInterval(() => {
+            if (typeof firebase !== "undefined") {
+              clearInterval(checkFirebase)
+              resolve()
+            }
+          }, 100)
+        })
+      }
+
+      // Initialize Firebase if not already initialized
+      if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig)
+      }
+
+      this.db = firebase.firestore()
+      this.initialized = true
+      return { success: true }
+    } catch (error) {
+      console.error("Firebase Database initialization error:", error)
       return { success: false, error: error.message }
     }
   }
 
-  async getVehicles(status = null, categoryId = null, limitCount = 50) {
+  async getVehicles() {
     try {
-      if (!db) throw new Error("Firestore not initialized")
+      if (!this.initialized) await this.initialize()
 
-      let q = collection(db, this.collections.vehicles)
-      const conditions = []
-
-      if (status) {
-        conditions.push(where("status", "==", status))
-      }
-
-      if (categoryId) {
-        conditions.push(where("categoryId", "==", categoryId))
-      }
-
-      if (conditions.length > 0) {
-        q = query(q, ...conditions)
-      }
-
-      q = query(q, orderBy("createdAt", "desc"), limit(limitCount))
-
-      const querySnapshot = await getDocs(q)
+      const snapshot = await this.db.collection("vehicles").get()
       const vehicles = []
 
-      querySnapshot.forEach((doc) => {
-        vehicles.push({ id: doc.id, ...doc.data() })
+      snapshot.forEach((doc) => {
+        vehicles.push({
+          id: doc.id,
+          ...doc.data(),
+        })
       })
 
       return { success: true, vehicles }
@@ -359,15 +222,14 @@ class FirebaseDBManager {
     }
   }
 
-  async getVehicle(vehicleId) {
+  async getVehicleById(id) {
     try {
-      if (!db) throw new Error("Firestore not initialized")
+      if (!this.initialized) await this.initialize()
 
-      const vehicleRef = doc(db, this.collections.vehicles, vehicleId)
-      const vehicleSnap = await getDoc(vehicleRef)
+      const doc = await this.db.collection("vehicles").doc(id).get()
 
-      if (vehicleSnap.exists()) {
-        return { success: true, vehicle: vehicleSnap.data() }
+      if (doc.exists) {
+        return { success: true, vehicle: { id: doc.id, ...doc.data() } }
       } else {
         return { success: false, error: "Vehicle not found" }
       }
@@ -377,422 +239,250 @@ class FirebaseDBManager {
     }
   }
 
-  async updateVehicle(vehicleId, vehicleData) {
+  async getCategories() {
     try {
-      if (!db) throw new Error("Firestore not initialized")
+      if (!this.initialized) await this.initialize()
 
-      const vehicleRef = doc(db, this.collections.vehicles, vehicleId)
-      const updateData = {
-        ...vehicleData,
-        updatedAt: serverTimestamp(),
-      }
+      const snapshot = await this.db.collection("categories").get()
+      const categories = []
 
-      await updateDoc(vehicleRef, updateData)
-      return { success: true }
+      snapshot.forEach((doc) => {
+        categories.push({
+          id: doc.id,
+          ...doc.data(),
+        })
+      })
+
+      return { success: true, categories }
     } catch (error) {
-      console.error("Error updating vehicle:", error)
+      console.error("Error getting categories:", error)
       return { success: false, error: error.message }
     }
   }
 
-  // System Settings
-  async getSetting(key, defaultValue = null) {
+  async getPopularVehicles(limit = 4) {
     try {
-      if (!db) throw new Error("Firestore not initialized")
+      if (!this.initialized) await this.initialize()
 
-      const settingRef = doc(db, this.collections.settings, key)
-      const settingSnap = await getDoc(settingRef)
+      // Get vehicles sorted by popularity (you can define your own criteria)
+      // For now, we'll just get the most recently added vehicles
+      const snapshot = await this.db.collection("vehicles").orderBy("createdAt", "desc").limit(limit).get()
 
-      if (settingSnap.exists()) {
-        const data = settingSnap.data()
-        return data.value
-      } else {
-        return defaultValue
-      }
+      const vehicles = []
+
+      snapshot.forEach((doc) => {
+        vehicles.push({
+          id: doc.id,
+          ...doc.data(),
+        })
+      })
+
+      return { success: true, vehicles }
     } catch (error) {
-      console.error("Error getting setting:", error)
-      return defaultValue
-    }
-  }
-
-  async setSetting(key, value, description = "", category = "general") {
-    try {
-      if (!db) throw new Error("Firestore not initialized")
-
-      const settingRef = doc(db, this.collections.settings, key)
-      const setting = {
-        key: key,
-        value: value,
-        description: description,
-        category: category,
-        updatedAt: serverTimestamp(),
-      }
-
-      await setDoc(settingRef, setting, { merge: true })
-      return { success: true }
-    } catch (error) {
-      console.error("Error setting value:", error)
+      console.error("Error getting popular vehicles:", error)
       return { success: false, error: error.message }
     }
   }
 
-  // Activity Logging
-  async logActivity(userId, action, entityType = null, entityId = null, description = null) {
+  async addContactMessage(formData) {
     try {
-      if (!db) throw new Error("Firestore not initialized")
+      if (!this.initialized) await this.initialize()
 
-      const activityRef = doc(collection(db, this.collections.activities))
-      const activity = {
-        id: activityRef.id,
-        userId: userId,
-        action: action,
-        entityType: entityType,
-        entityId: entityId,
-        description: description,
-        ipAddress: await this.getClientIP(),
-        userAgent: navigator.userAgent,
-        createdAt: serverTimestamp(),
-      }
-
-      await setDoc(activityRef, activity)
-      return { success: true }
-    } catch (error) {
-      console.error("Error logging activity:", error)
-      return { success: false }
-    }
-  }
-
-  // Utility Functions
-  generateUsernameFromEmail(email) {
-    let username = email.split("@")[0]
-    username = username.replace(/[^a-zA-Z0-9_]/g, "")
-
-    if (username.length < 3) {
-      username += Math.floor(Math.random() * 1000)
-    }
-
-    return username
-  }
-
-  async getClientIP() {
-    try {
-      const response = await fetch("https://api.ipify.org?format=json")
-      const data = await response.json()
-      return data.ip
-    } catch (error) {
-      return "unknown"
-    }
-  }
-}
-
-// Firebase Auth Manager
-class FirebaseAuthManager {
-  constructor() {
-    this.currentUser = null
-    this.dbManager = new FirebaseDBManager()
-    this.authInitialized = false
-    this.initAuthStateListener()
-  }
-
-  initAuthStateListener() {
-    if (!auth) {
-      console.error("Auth not initialized")
-      return
-    }
-
-    onAuthStateChanged(auth, async (user) => {
-      this.currentUser = user
-      this.authInitialized = true
-
-      if (user) {
-        await this.handleUserSignIn(user)
-      } else {
-        this.handleUserSignOut()
-      }
-    })
-  }
-
-  async handleUserSignIn(user) {
-    try {
-      // Check if user exists in Firestore
-      const userResult = await this.dbManager.getUser(user.uid)
-
-      if (!userResult.success) {
-        // Create new user in Firestore
-        await this.dbManager.createUser({
-          uid: user.uid,
-          email: user.email,
-          fullName: user.displayName || "",
-          emailVerified: user.emailVerified,
-          photoURL: user.photoURL || "",
-          authProvider: "firebase",
-        })
-      } else {
-        // Update last login
-        await this.dbManager.updateUser(user.uid, {
-          lastLoginAt: serverTimestamp(),
-        })
-      }
-
-      this.updateUIForAuthenticatedUser(user)
-    } catch (error) {
-      console.error("Error handling user sign in:", error)
-    }
-  }
-
-  handleUserSignOut() {
-    this.updateUIForUnauthenticatedUser()
-    // Clear any cached data
-    sessionStorage.clear()
-    localStorage.removeItem("userRole")
-    localStorage.removeItem("userPreferences")
-  }
-
-  async signUpWithEmail(email, password, userData) {
-    try {
-      if (!auth) throw new Error("Auth not initialized")
-
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password)
-      const user = userCredential.user
-
-      await updateProfile(user, {
-        displayName: userData.fullName,
+      const result = await this.db.collection("contactMessages").add({
+        ...formData,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       })
 
-      await this.dbManager.createUser({
-        uid: user.uid,
-        email: user.email,
-        username: userData.username || email.split("@")[0],
-        fullName: userData.fullName,
-        phone: userData.phone || "",
-        address: userData.address || "",
-        emailVerified: user.emailVerified,
-        photoURL: user.photoURL || "",
-        authProvider: "firebase",
+      return { success: true, id: result.id }
+    } catch (error) {
+      console.error("Error adding contact message:", error)
+      return { success: false, error: error.message }
+    }
+  }
+
+  async createBooking(bookingData) {
+    try {
+      if (!this.initialized) await this.initialize()
+
+      const result = await this.db.collection("bookings").add({
+        ...bookingData,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        status: "pending",
       })
 
-      return { success: true, user: user }
+      return { success: true, id: result.id }
     } catch (error) {
-      console.error("Firebase signup error:", error)
-      return { success: false, error: this.getErrorMessage(error) }
+      console.error("Error creating booking:", error)
+      return { success: false, error: error.message }
     }
   }
 
-  async signInWithEmail(email, password) {
+  async getUserBookings(userId) {
     try {
-      if (!auth) throw new Error("Auth not initialized")
+      if (!this.initialized) await this.initialize()
 
-      const userCredential = await signInWithEmailAndPassword(auth, email, password)
-      return { success: true, user: userCredential.user }
-    } catch (error) {
-      console.error("Firebase signin error:", error)
-      return { success: false, error: this.getErrorMessage(error) }
-    }
-  }
+      const snapshot = await this.db
+        .collection("bookings")
+        .where("userId", "==", userId)
+        .orderBy("createdAt", "desc")
+        .get()
 
-  async signInWithGoogle() {
-    try {
-      if (!auth) throw new Error("Auth not initialized")
+      const bookings = []
 
-      const result = await signInWithPopup(auth, googleProvider)
-      const user = result.user
-      const isNewUser = result._tokenResponse?.isNewUser || false
-
-      if (isNewUser) {
-        await this.dbManager.createUser({
-          uid: user.uid,
-          email: user.email,
-          fullName: user.displayName || "",
-          emailVerified: user.emailVerified,
-          photoURL: user.photoURL || "",
-          authProvider: "google",
+      snapshot.forEach((doc) => {
+        bookings.push({
+          id: doc.id,
+          ...doc.data(),
         })
-      }
-
-      return { success: true, user: user, isNewUser: isNewUser }
-    } catch (error) {
-      console.error("Google signin error:", error)
-      return { success: false, error: this.getErrorMessage(error) }
-    }
-  }
-
-  async signInWithFacebook() {
-    try {
-      if (!auth) throw new Error("Auth not initialized")
-
-      const result = await signInWithPopup(auth, facebookProvider)
-      const user = result.user
-      const isNewUser = result._tokenResponse?.isNewUser || false
-
-      if (isNewUser) {
-        await this.dbManager.createUser({
-          uid: user.uid,
-          email: user.email,
-          fullName: user.displayName || "",
-          emailVerified: user.emailVerified,
-          photoURL: user.photoURL || "",
-          authProvider: "facebook",
-        })
-      }
-
-      return { success: true, user: user, isNewUser: isNewUser }
-    } catch (error) {
-      console.error("Facebook signin error:", error)
-      return { success: false, error: this.getErrorMessage(error) }
-    }
-  }
-
-  async signOut() {
-    try {
-      if (!auth) throw new Error("Auth not initialized")
-
-      await signOut(auth)
-      return { success: true }
-    } catch (error) {
-      console.error("Signout error:", error)
-      return { success: false, error: this.getErrorMessage(error) }
-    }
-  }
-
-  async resetPassword(email) {
-    try {
-      if (!auth) throw new Error("Auth not initialized")
-
-      await sendPasswordResetEmail(auth, email)
-      return { success: true }
-    } catch (error) {
-      console.error("Password reset error:", error)
-      return { success: false, error: this.getErrorMessage(error) }
-    }
-  }
-
-  updateUIForAuthenticatedUser(user) {
-    const authButtons = document.querySelectorAll(".auth-buttons")
-    const userMenu = document.querySelectorAll(".user-menu")
-
-    authButtons.forEach((btn) => (btn.style.display = "none"))
-    userMenu.forEach((menu) => {
-      menu.style.display = "block"
-      const userNameElement = menu.querySelector(".user-name")
-      const userAvatarElement = menu.querySelector("#user-avatar")
-
-      if (userNameElement) {
-        userNameElement.textContent = user.displayName || user.email
-      }
-
-      if (userAvatarElement && user.photoURL) {
-        userAvatarElement.src = user.photoURL
-      }
-    })
-
-    const authContent = document.querySelectorAll(".auth-required")
-    authContent.forEach((content) => (content.style.display = "block"))
-  }
-
-  updateUIForUnauthenticatedUser() {
-    const authButtons = document.querySelectorAll(".auth-buttons")
-    const userMenu = document.querySelectorAll(".user-menu")
-
-    authButtons.forEach((btn) => (btn.style.display = "block"))
-    userMenu.forEach((menu) => (menu.style.display = "none"))
-
-    const authContent = document.querySelectorAll(".auth-required")
-    authContent.forEach((content) => (content.style.display = "none"))
-  }
-
-  getErrorMessage(error) {
-    const errorMessages = {
-      "auth/user-not-found": "No account found with this email address.",
-      "auth/wrong-password": "Incorrect password. Please try again.",
-      "auth/email-already-in-use": "An account with this email already exists.",
-      "auth/weak-password": "Password should be at least 6 characters long.",
-      "auth/invalid-email": "Please enter a valid email address.",
-      "auth/user-disabled": "This account has been disabled.",
-      "auth/too-many-requests": "Too many failed attempts. Please try again later.",
-      "auth/network-request-failed": "Network error. Please check your connection.",
-      "auth/popup-closed-by-user": "Sign-in popup was closed before completion.",
-      "auth/cancelled-popup-request": "Sign-in was cancelled.",
-    }
-
-    return errorMessages[error.code] || error.message || "An unexpected error occurred."
-  }
-
-  getCurrentUser() {
-    return this.currentUser
-  }
-
-  isAuthenticated() {
-    return this.currentUser !== null
-  }
-
-  async getUserRole() {
-    if (!this.currentUser) return null
-
-    const userResult = await this.dbManager.getUser(this.currentUser.uid)
-    if (userResult.success) {
-      return userResult.user.role
-    }
-    return "customer"
-  }
-
-  async isAdmin() {
-    const role = await this.getUserRole()
-    return role === "admin"
-  }
-
-  async isCustomer() {
-    const role = await this.getUserRole()
-    return role === "customer"
-  }
-
-  // Wait for auth state to be determined
-  waitForAuth() {
-    return new Promise((resolve) => {
-      if (this.authInitialized) {
-        resolve(this.currentUser)
-        return
-      }
-
-      if (!auth) {
-        resolve(null)
-        return
-      }
-
-      const unsubscribe = onAuthStateChanged(auth, (user) => {
-        this.currentUser = user
-        this.authInitialized = true
-        unsubscribe()
-        resolve(user)
       })
 
-      // Timeout after 10 seconds to prevent hanging
-      setTimeout(() => {
-        if (!this.authInitialized) {
-          console.warn("Auth initialization timed out")
-          this.authInitialized = true
-          resolve(null)
+      return { success: true, bookings }
+    } catch (error) {
+      console.error("Error getting user bookings:", error)
+      return { success: false, error: error.message }
+    }
+  }
+
+  async initializeSampleData() {
+    try {
+      if (!this.initialized) await this.initialize()
+
+      // Check if categories exist
+      const categoriesSnapshot = await this.db.collection("categories").get()
+      if (categoriesSnapshot.empty) {
+        // Create categories
+        const categories = [
+          { name: "Budget Cars (Hatchback)", description: "Affordable and fuel-efficient small cars", icon: "car" },
+          { name: "Sedans", description: "Comfortable mid-size cars for families and business", icon: "car-side" },
+          { name: "SUVs & Jeeps", description: "Spacious vehicles for rough terrain and adventure", icon: "truck" },
+          { name: "Vans (KDH/HiAce)", description: "Large vehicles for groups and tours", icon: "shuttle-van" },
+          { name: "Luxury Cars", description: "Premium vehicles for special occasions", icon: "car-alt" },
+        ]
+
+        const categoryRefs = {}
+        for (const category of categories) {
+          const docRef = await this.db.collection("categories").add({
+            ...category,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          })
+          categoryRefs[category.name] = docRef.id
         }
-      }, 10000)
-    })
-  }
 
-  async initialize() {
-    try {
-      // Wait for auth state to be determined
-      await this.waitForAuth()
-      console.log("Firebase Auth initialized successfully")
-      return { success: true }
+        // Create sample vehicles
+        const vehicles = [
+          {
+            make: "Suzuki",
+            model: "Alto",
+            year: 2020,
+            color: "White",
+            transmission: "manual",
+            fuelType: "petrol",
+            seats: 4,
+            dailyRate: 3500,
+            categoryId: categoryRefs["Budget Cars (Hatchback)"],
+            status: "available",
+            features: "AC, Power Steering, Radio",
+            licensePlate: "CAR-1234",
+            mileage: 25000,
+            imageUrl: "/placeholder.svg?width=400&height=250&text=Suzuki+Alto",
+          },
+          {
+            make: "Toyota",
+            model: "Axio",
+            year: 2018,
+            color: "Silver",
+            transmission: "automatic",
+            fuelType: "petrol",
+            seats: 5,
+            dailyRate: 6000,
+            categoryId: categoryRefs["Sedans"],
+            status: "available",
+            features: "AC, Power Steering, Power Windows, Bluetooth Audio",
+            licensePlate: "CAB-5678",
+            mileage: 45000,
+            imageUrl: "/placeholder.svg?width=400&height=250&text=Toyota+Axio",
+          },
+          {
+            make: "Toyota",
+            model: "Prado",
+            year: 2019,
+            color: "Black",
+            transmission: "automatic",
+            fuelType: "diesel",
+            seats: 7,
+            dailyRate: 15000,
+            categoryId: categoryRefs["SUVs & Jeeps"],
+            status: "available",
+            features: "AC, Power Steering, Power Windows, Bluetooth Audio, Leather Seats, Sunroof",
+            licensePlate: "SUV-9012",
+            mileage: 35000,
+            imageUrl: "/placeholder.svg?width=400&height=250&text=Toyota+Prado",
+          },
+          {
+            make: "Toyota",
+            model: "KDH",
+            year: 2020,
+            color: "White",
+            transmission: "manual",
+            fuelType: "diesel",
+            seats: 14,
+            dailyRate: 10000,
+            categoryId: categoryRefs["Vans (KDH/HiAce)"],
+            status: "available",
+            features: "AC, Power Steering, DVD Player",
+            licensePlate: "VAN-3456",
+            mileage: 40000,
+            imageUrl: "/placeholder.svg?width=400&height=250&text=Toyota+KDH",
+          },
+          {
+            make: "BMW",
+            model: "5 Series",
+            year: 2021,
+            color: "Blue",
+            transmission: "automatic",
+            fuelType: "petrol",
+            seats: 5,
+            dailyRate: 25000,
+            categoryId: categoryRefs["Luxury Cars"],
+            status: "available",
+            features: "AC, Power Steering, Power Windows, Bluetooth Audio, Leather Seats, Sunroof, Navigation",
+            licensePlate: "LUX-7890",
+            mileage: 15000,
+            imageUrl: "/placeholder.svg?width=400&height=250&text=BMW+5+Series",
+          },
+        ]
+
+        for (const vehicle of vehicles) {
+          await this.db.collection("vehicles").add({
+            ...vehicle,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          })
+        }
+
+        // Create system settings
+        await this.db.collection("settings").doc("general").set({
+          siteName: "VehicleRent Pro Sri Lanka",
+          currency: "LKR",
+          contactEmail: "support.lk@vehiclerentpro.com",
+          contactPhone: "+94 77 123 4567",
+          address: "123 Galle Road, Colombo 03, Sri Lanka",
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        })
+
+        return { success: true }
+      }
+
+      return { success: true, message: "Sample data already exists" }
     } catch (error) {
-      console.error("Firebase Auth initialization failed:", error)
+      console.error("Error initializing sample data:", error)
       return { success: false, error: error.message }
     }
   }
 }
 
-// Initialize Firebase Auth Manager and DB Manager
+// Create instances
 const firebaseAuth = new FirebaseAuthManager()
-const firebaseDB = new FirebaseDBManager()
+const firebaseDB = new FirebaseDatabaseManager()
 
-// Export Firebase app and services
-export { app, auth, db, storage, analytics, googleProvider, facebookProvider, firebaseAuth, firebaseDB }
-export default app
+// Export the instances
+export { firebaseAuth, firebaseDB }
