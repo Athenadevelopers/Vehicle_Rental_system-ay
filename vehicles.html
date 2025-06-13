@@ -3,27 +3,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Our Fleet - VehicleRent Pro Sri Lanka</title>
+    <title>Our Vehicles - VehicleRent Pro Sri Lanka</title>
     
-    <meta name="description" content="Explore our diverse fleet of vehicles available for rent across Sri Lanka. From economy cars to luxury vehicles, find the perfect ride for your journey.">
-    <meta name="keywords" content="vehicle fleet sri lanka, car rental colombo, rent a car sri lanka, van rental sri lanka, suv rental sri lanka">
+    <meta name="description" content="Browse our diverse fleet of vehicles for rent in Sri Lanka. From budget cars to luxury vehicles, we have the perfect option for your journey.">
+    <meta name="keywords" content="vehicle rental sri lanka, car hire colombo, rent a car sri lanka, van rental sri lanka">
     
-    <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    <link href="assets/css/style.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-50: #f0f9ff;
+            --primary-100: #e0f2fe;
+            --primary-200: #bae6fd;
+            --primary-300: #7dd3fc;
+            --primary-400: #38bdf8;
+            --primary-500: #0ea5e9;
+            --primary-600: #0284c7;
+            --primary-700: #0369a1;
+            --primary-800: #075985;
+            --primary-900: #0c4a6e;
+        }
+        
+        .bg-primary-50 { background-color: var(--primary-50); }
+        .bg-primary-100 { background-color: var(--primary-100); }
+        .bg-primary-200 { background-color: var(--primary-200); }
+        .bg-primary-300 { background-color: var(--primary-300); }
+        .bg-primary-400 { background-color: var(--primary-400); }
+        .bg-primary-500 { background-color: var(--primary-500); }
+        .bg-primary-600 { background-color: var(--primary-600); }
+        .bg-primary-700 { background-color: var(--primary-700); }
+        .bg-primary-800 { background-color: var(--primary-800); }
+        .bg-primary-900 { background-color: var(--primary-900); }
+        
+        .text-primary-50 { color: var(--primary-50); }
+        .text-primary-100 { color: var(--primary-100); }
+        .text-primary-200 { color: var(--primary-200); }
+        .text-primary-300 { color: var(--primary-300); }
+        .text-primary-400 { color: var(--primary-400); }
+        .text-primary-500 { color: var(--primary-500); }
+        .text-primary-600 { color: var(--primary-600); }
+        .text-primary-700 { color: var(--primary-700); }
+        .text-primary-800 { color: var(--primary-800); }
+        .text-primary-900 { color: var(--primary-900); }
+        
+        .border-primary-500 { border-color: var(--primary-500); }
+        .border-primary-600 { border-color: var(--primary-600); }
+        
+        .hover\:bg-primary-700:hover { background-color: var(--primary-700); }
+        .hover\:text-primary-600:hover { color: var(--primary-600); }
+        .hover\:text-primary-700:hover { color: var(--primary-700); }
+        
+        .focus\:ring-primary-500:focus { --tw-ring-color: var(--primary-500); }
+        .focus\:border-primary-500:focus { border-color: var(--primary-500); }
+        
+        /* Custom styles */
+        .page-header {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://source.unsplash.com/1600x400/?cars,fleet');
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .vehicle-card {
+            transition: all 0.3s ease;
+        }
+        
+        .vehicle-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        /* Price tag */
+        .price-tag {
+            position: relative;
+            background: var(--primary-600);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+        
+        .price-tag:after {
+            content: '';
+            position: absolute;
+            right: -8px;
+            top: 50%;
+            transform: translateY(-50%);
+            border-left: 8px solid var(--primary-600);
+            border-top: 8px solid transparent;
+            border-bottom: 8px solid transparent;
+        }
+    </style>
 </head>
 <body class="bg-gray-100">
-    <!-- Loading Screen -->
-    <div id="loading-screen" class="fixed inset-0 bg-white z-50 flex items-center justify-center">
-        <div class="text-center">
-            <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-primary-600 mx-auto mb-4"></div>
-            <h3 class="text-lg font-medium text-gray-900">Loading VehicleRent Pro...</h3>
-            <p class="text-sm text-gray-600 mt-2">Preparing vehicle fleet data</p>
-        </div>
-    </div>
-
     <!-- Navigation -->
     <nav class="bg-white shadow-md sticky top-0 z-40" id="main-nav">
         <div class="container mx-auto px-4">
@@ -45,40 +119,24 @@
                         </button>
                         <div class="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg border hidden group-hover:block">
                             <div class="py-1">
-                                <a href="vehicles.html?category=budget" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Budget Cars</a>
-                                <a href="vehicles.html?category=sedan" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Sedans</a>
-                                <a href="vehicles.html?category=suv" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">SUVs & Jeeps</a>
-                                <a href="vehicles.html?category=van" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Vans</a>
-                                <a href="vehicles.html?category=luxury" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Luxury Cars</a>
-                                <div class="border-t border-gray-100 my-1"></div>
-                                <a href="vehicles.html" class="block px-4 py-2 text-sm text-primary-600 hover:bg-gray-100">View All Vehicles</a>
+                                <a href="#budget" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Budget Cars</a>
+                                <a href="#sedan" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Sedans</a>
+                                <a href="#suv" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">SUVs & Jeeps</a>
+                                <a href="#van" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Vans</a>
+                                <a href="#luxury" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Luxury Cars</a>
                             </div>
                         </div>
                     </div>
                     <a href="about-us.html" class="text-gray-600 hover:text-primary-600 transition font-medium">About Us</a>
                     <a href="contact-us.html" class="text-gray-600 hover:text-primary-600 transition font-medium">Contact</a>
                 </div>
-                <div class="auth-buttons flex items-center space-x-3">
-                    <button id="login-btn" class="text-gray-600 hover:text-primary-600 transition font-medium">
+                <div class="flex items-center space-x-3">
+                    <button class="text-gray-600 hover:text-primary-600 transition font-medium">
                         <i class="fas fa-sign-in-alt mr-1"></i>Login
                     </button>
-                    <button id="register-btn" class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-md transition font-semibold text-sm">
+                    <button class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-md transition font-semibold text-sm">
                         <i class="fas fa-user-plus mr-1"></i>Sign Up
                     </button>
-                </div>
-                <div class="user-menu hidden relative">
-                    <button id="user-menu-btn" class="flex items-center space-x-3 text-gray-700 hover:text-primary-600 transition">
-                        <img id="user-avatar" src="/placeholder.svg?width=32&height=32&text=User" alt="User Avatar" class="w-8 h-8 rounded-full">
-                        <span id="user-name" class="user-name font-medium">User Name</span>
-                        <i class="fas fa-chevron-down text-xs"></i>
-                    </button>
-                    <div id="user-dropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border hidden py-1">
-                        <a href="#" id="dashboard-link" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"><i class="fas fa-tachometer-alt mr-2"></i>Dashboard</a>
-                        <a href="#" id="profile-link" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"><i class="fas fa-user mr-2"></i>Profile</a>
-                        <a href="#" id="bookings-link" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"><i class="fas fa-calendar-alt mr-2"></i>My Bookings</a>
-                        <div class="border-t border-gray-100 my-1"></div>
-                        <button id="logout-btn" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"><i class="fas fa-sign-out-alt mr-2"></i>Logout</button>
-                    </div>
                 </div>
                 <button id="mobile-menu-btn" class="md:hidden text-gray-700"><i class="fas fa-bars text-xl"></i></button>
             </div>
@@ -87,16 +145,15 @@
             <div class="px-4 py-2 space-y-2">
                 <a href="index.html" class="block py-2 text-gray-700 hover:text-primary-600 transition">Home</a>
                 <div class="py-2">
-                    <button class="flex items-center justify-between w-full text-gray-700 hover:text-primary-600 transition" onclick="toggleMobileSubmenu()">
+                    <button class="flex items-center justify-between w-full text-primary-600 hover:text-primary-700 transition" onclick="toggleMobileSubmenu()">
                         Vehicles <i class="fas fa-chevron-down ml-1 text-xs"></i>
                     </button>
                     <div id="mobile-submenu" class="hidden pl-4 mt-2 space-y-2">
-                        <a href="vehicles.html?category=budget" class="block py-2 text-gray-700 hover:text-primary-600 transition">Budget Cars</a>
-                        <a href="vehicles.html?category=sedan" class="block py-2 text-gray-700 hover:text-primary-600 transition">Sedans</a>
-                        <a href="vehicles.html?category=suv" class="block py-2 text-gray-700 hover:text-primary-600 transition">SUVs & Jeeps</a>
-                        <a href="vehicles.html?category=van" class="block py-2 text-gray-700 hover:text-primary-600 transition">Vans</a>
-                        <a href="vehicles.html?category=luxury" class="block py-2 text-gray-700 hover:text-primary-600 transition">Luxury Cars</a>
-                        <a href="vehicles.html" class="block py-2 text-primary-600 hover:text-primary-700 transition">View All Vehicles</a>
+                        <a href="#budget" class="block py-2 text-gray-700 hover:text-primary-600 transition">Budget Cars</a>
+                        <a href="#sedan" class="block py-2 text-gray-700 hover:text-primary-600 transition">Sedans</a>
+                        <a href="#suv" class="block py-2 text-gray-700 hover:text-primary-600 transition">SUVs & Jeeps</a>
+                        <a href="#van" class="block py-2 text-gray-700 hover:text-primary-600 transition">Vans</a>
+                        <a href="#luxury" class="block py-2 text-gray-700 hover:text-primary-600 transition">Luxury Cars</a>
                     </div>
                 </div>
                 <a href="about-us.html" class="block py-2 text-gray-700 hover:text-primary-600 transition">About Us</a>
@@ -106,183 +163,336 @@
     </nav>
 
     <!-- Page Header -->
-    <div class="bg-gradient-to-r from-primary-600 to-primary-800 text-white py-12">
-        <div class="container mx-auto px-4">
-            <div class="flex flex-col md:flex-row justify-between items-center">
-                <div>
-                    <h1 class="text-3xl md:text-4xl font-bold mb-2">Our Vehicle Fleet</h1>
-                    <p class="text-primary-100">Explore our diverse range of vehicles available for rent across Sri Lanka</p>
-                </div>
-                <div class="mt-4 md:mt-0">
-                    <nav class="flex" aria-label="Breadcrumb">
-                        <ol class="flex items-center space-x-2">
-                            <li><a href="index.html" class="text-primary-100 hover:text-white">Home</a></li>
-                            <li class="flex items-center">
-                                <i class="fas fa-chevron-right text-primary-300 mx-2 text-xs"></i>
-                                <span class="text-white">Vehicles</span>
-                            </li>
-                        </ol>
-                    </nav>
-                </div>
-            </div>
+    <section class="page-header py-20 text-white">
+        <div class="container mx-auto px-4 text-center">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4" data-aos="fade-up">Our Vehicle Fleet</h1>
+            <p class="text-xl max-w-3xl mx-auto" data-aos="fade-up" data-aos-delay="100">Browse our diverse collection of well-maintained vehicles for rent in Sri Lanka</p>
         </div>
-    </div>
+    </section>
 
     <!-- Filter Section -->
-    <div class="bg-white shadow-md py-6 mb-8">
+    <section class="py-8 bg-white shadow-md sticky top-16 z-30">
         <div class="container mx-auto px-4">
-            <form id="vehicle-filter-form" class="grid grid-cols-1 md:grid-cols-5 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Vehicle Type</label>
-                    <select id="category-filter" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500">
-                        <option value="">All Types</option>
-                        <option value="budget">Budget Cars</option>
-                        <option value="sedan">Sedans</option>
-                        <option value="suv">SUVs & Jeeps</option>
-                        <option value="van">Vans</option>
-                        <option value="luxury">Luxury Cars</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Transmission</label>
-                    <select id="transmission-filter" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500">
-                        <option value="">Any</option>
-                        <option value="automatic">Automatic</option>
-                        <option value="manual">Manual</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Fuel Type</label>
-                    <select id="fuel-filter" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500">
-                        <option value="">Any</option>
-                        <option value="petrol">Petrol</option>
-                        <option value="diesel">Diesel</option>
-                        <option value="hybrid">Hybrid</option>
-                        <option value="electric">Electric</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Price Range (LKR)</label>
-                    <div class="flex items-center space-x-2">
-                        <input type="number" id="min-price" placeholder="Min" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500">
-                        <span>-</span>
-                        <input type="number" id="max-price" placeholder="Max" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500">
+            <div class="flex flex-wrap items-center justify-between">
+                <div class="flex flex-wrap items-center space-x-4 mb-4 md:mb-0">
+                    <span class="font-medium text-gray-700">Filter By:</span>
+                    <div class="relative">
+                        <select class="appearance-none bg-gray-100 border border-gray-300 rounded-md py-2 pl-3 pr-8 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                            <option>All Vehicle Types</option>
+                            <option>Budget Cars</option>
+                            <option>Sedans</option>
+                            <option>SUVs & Jeeps</option>
+                            <option>Vans</option>
+                            <option>Luxury Cars</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                            <i class="fas fa-chevron-down text-xs"></i>
+                        </div>
+                    </div>
+                    <div class="relative">
+                        <select class="appearance-none bg-gray-100 border border-gray-300 rounded-md py-2 pl-3 pr-8 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                            <option>All Transmissions</option>
+                            <option>Automatic</option>
+                            <option>Manual</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                            <i class="fas fa-chevron-down text-xs"></i>
+                        </div>
+                    </div>
+                    <div class="relative">
+                        <select class="appearance-none bg-gray-100 border border-gray-300 rounded-md py-2 pl-3 pr-8 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                            <option>All Fuel Types</option>
+                            <option>Petrol</option>
+                            <option>Diesel</option>
+                            <option>Hybrid</option>
+                            <option>Electric</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                            <i class="fas fa-chevron-down text-xs"></i>
+                        </div>
                     </div>
                 </div>
-                <div class="flex items-end">
-                    <button type="submit" class="w-full bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-md transition font-medium">
-                        <i class="fas fa-filter mr-2"></i>Apply Filters
-                    </button>
+                <div class="relative">
+                    <select class="appearance-none bg-gray-100 border border-gray-300 rounded-md py-2 pl-3 pr-8 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                        <option>Sort By: Featured</option>
+                        <option>Price: Low to High</option>
+                        <option>Price: High to Low</option>
+                        <option>Newest First</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                        <i class="fas fa-chevron-down text-xs"></i>
+                    </div>
                 </div>
-            </form>
+            </div>
         </div>
-    </div>
+    </section>
 
-    <!-- Vehicles Grid -->
-    <div class="container mx-auto px-4 py-8">
-        <div class="mb-8">
-            <h2 class="text-2xl font-bold text-gray-800 mb-2" id="results-heading">All Vehicles</h2>
-            <p class="text-gray-600" id="results-count">Showing all available vehicles</p>
-        </div>
-        
-        <div id="vehicles-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <!-- Vehicle cards will be dynamically inserted here by vehicles.js -->
-            <div class="text-center py-10 col-span-full">
-                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
-                <p class="text-gray-600">Loading vehicles...</p>
-            </div>
-        </div>
-        
-        <!-- Pagination -->
-        <div class="mt-12 flex justify-center" id="pagination-container">
-            <nav class="flex items-center space-x-2">
-                <button id="prev-page" class="px-3 py-1 rounded-md border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
-                    <i class="fas fa-chevron-left"></i>
-                </button>
-                <div id="page-numbers" class="flex items-center space-x-2">
-                    <!-- Page numbers will be inserted here -->
-                </div>
-                <button id="next-page" class="px-3 py-1 rounded-md border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
-                    <i class="fas fa-chevron-right"></i>
-                </button>
-            </nav>
-        </div>
-    </div>
-
-    <!-- Vehicle Detail Modal -->
-    <div id="vehicle-detail-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            <div class="sticky top-0 bg-white z-10 flex justify-between items-center p-4 border-b">
-                <h3 class="text-xl font-bold text-gray-800" id="modal-vehicle-title">Vehicle Details</h3>
-                <button id="close-modal" class="text-gray-400 hover:text-gray-600 transition-colors">
-                    <i class="fas fa-times text-xl"></i>
-                </button>
-            </div>
-            <div class="p-4" id="modal-vehicle-content">
-                <!-- Vehicle details will be inserted here -->
-            </div>
-            <div class="sticky bottom-0 bg-white z-10 p-4 border-t flex justify-end">
-                <button id="book-now-btn" class="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2 rounded-md transition font-medium">
-                    Book Now
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Footer -->
-    <footer id="contact" class="bg-gray-800 text-white py-16">
+    <!-- Budget Cars Section -->
+    <section id="budget" class="py-16">
         <div class="container mx-auto px-4">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-                <div>
-                    <div class="flex items-center mb-4">
-                        <div class="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center mr-3"><i class="fas fa-road text-white"></i></div>
-                        <div><h3 class="text-xl font-bold">VehicleRent Pro SL</h3></div>
+            <h2 class="text-3xl font-bold text-gray-800 mb-8" data-aos="fade-up">Budget Cars</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Vehicle 1 -->
+                <div class="vehicle-card bg-white rounded-lg shadow-md overflow-hidden" data-aos="fade-up">
+                    <div class="relative">
+                        <img src="https://source.unsplash.com/400x250/?car,suzuki" alt="Suzuki Alto" class="w-full h-48 object-cover">
+                        <div class="absolute top-0 right-0 bg-primary-600 text-white px-3 py-1 text-sm font-semibold">
+                            Available
+                        </div>
                     </div>
-                    <p class="text-gray-400 mb-4">Your reliable partner for vehicle rentals across Sri Lanka. Explore with confidence.</p>
-                </div>
-                <div>
-                    <h4 class="text-lg font-semibold mb-4">Quick Links</h4>
-                    <ul class="space-y-2">
-                        <li><a href="index.html" class="text-gray-400 hover:text-white transition">Home</a></li>
-                        <li><a href="vehicles.html" class="text-gray-400 hover:text-white transition">Vehicles</a></li>
-                        <li><a href="about-us.html" class="text-gray-400 hover:text-white transition">About Us</a></li>
-                        <li><a href="contact-us.html" class="text-gray-400 hover:text-white transition">Contact</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="text-lg font-semibold mb-4">Vehicle Types</h4>
-                    <ul class="space-y-2">
-                        <li><a href="vehicles.html?category=budget" class="text-gray-400 hover:text-white transition">Budget Cars</a></li>
-                        <li><a href="vehicles.html?category=sedan" class="text-gray-400 hover:text-white transition">Sedans & Hatchbacks</a></li>
-                        <li><a href="vehicles.html?category=suv" class="text-gray-400 hover:text-white transition">SUVs & 4x4s</a></li>
-                        <li><a href="vehicles.html?category=van" class="text-gray-400 hover:text-white transition">Vans & Minibuses</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="text-lg font-semibold mb-4">Contact Us (Sri Lanka)</h4>
-                    <div class="space-y-2 text-gray-400">
-                        <p><i class="fas fa-phone mr-2"></i> +94 77 123 4567</p>
-                        <p><i class="fas fa-envelope mr-2"></i> support.lk@vehiclerentpro.com</p>
-                        <p><i class="fas fa-map-marker-alt mr-2"></i> 123 Galle Road, Colombo 03, Sri Lanka</p>
+                    <div class="p-4">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-1">Suzuki Alto</h3>
+                        <p class="text-sm text-gray-500 mb-3">
+                            2022 • Manual • Petrol
+                        </p>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-md flex items-center">
+                                <i class="fas fa-user-friends mr-1"></i> 4 Seats
+                            </span>
+                            <span class="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-md flex items-center">
+                                <i class="fas fa-suitcase mr-1"></i> 2 Bags
+                            </span>
+                            <span class="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-md flex items-center">
+                                <i class="fas fa-gas-pump mr-1"></i> 22 km/l
+                            </span>
+                            <span class="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-md flex items-center">
+                                <i class="fas fa-snowflake mr-1"></i> A/C
+                            </span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="text-xl font-bold text-primary-600">LKR 3,500</span>
+                                <span class="text-sm text-gray-500">/day</span>
+                            </div>
+                            <a href="#" class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-md transition text-sm font-medium">
+                                Book Now
+                            </a>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="border-t border-gray-700 pt-8 text-center text-gray-400">
-                <p>&copy; <span id="current-year"></span> VehicleRent Pro Sri Lanka. All rights reserved.</p>
-                <p class="mt-1 text-sm">Powered by Firebase. Designed for Sri Lanka.</p>
+                
+                <!-- Vehicle 2 -->
+                <div class="vehicle-card bg-white rounded-lg shadow-md overflow-hidden" data-aos="fade-up" data-aos-delay="100">
+                    <div class="relative">
+                        <img src="https://source.unsplash.com/400x250/?car,wagon-r" alt="Suzuki Wagon R" class="w-full h-48 object-cover">
+                        <div class="absolute top-0 right-0 bg-primary-600 text-white px-3 py-1 text-sm font-semibold">
+                            Available
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-1">Suzuki Wagon R</h3>
+                        <p class="text-sm text-gray-500 mb-3">
+                            2021 • Automatic • Petrol
+                        </p>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-md flex items-center">
+                                <i class="fas fa-user-friends mr-1"></i> 5 Seats
+                            </span>
+                            <span class="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-md flex items-center">
+                                <i class="fas fa-suitcase mr-1"></i> 3 Bags
+                            </span>
+                            <span class="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-md flex items-center">
+                                <i class="fas fa-gas-pump mr-1"></i> 18 km/l
+                            </span>
+                            <span class="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-md flex items-center">
+                                <i class="fas fa-snowflake mr-1"></i> A/C
+                            </span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="text-xl font-bold text-primary-600">LKR 4,000</span>
+                                <span class="text-sm text-gray-500">/day</span>
+                            </div>
+                            <a href="#" class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-md transition text-sm font-medium">
+                                Book Now
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Vehicle 3 -->
+                <div class="vehicle-card bg-white rounded-lg shadow-md overflow-hidden" data-aos="fade-up" data-aos-delay="200">
+                    <div class="relative">
+                        <img src="https://source.unsplash.com/400x250/?car,toyota-vitz" alt="Toyota Vitz" class="w-full h-48 object-cover">
+                        <div class="absolute top-0 right-0 bg-primary-600 text-white px-3 py-1 text-sm font-semibold">
+                            Available
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-1">Toyota Vitz</h3>
+                        <p class="text-sm text-gray-500 mb-3">
+                            2020 • Automatic • Petrol
+                        </p>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-md flex items-center">
+                                <i class="fas fa-user-friends mr-1"></i> 5 Seats
+                            </span>
+                            <span class="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-md flex items-center">
+                                <i class="fas fa-suitcase mr-1"></i> 2 Bags
+                            </span>
+                            <span class="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-md flex items-center">
+                                <i class="fas fa-gas-pump mr-1"></i> 20 km/l
+                            </span>
+                            <span class="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-md flex items-center">
+                                <i class="fas fa-snowflake mr-1"></i> A/C
+                            </span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="text-xl font-bold text-primary-600">LKR 4,500</span>
+                                <span class="text-sm text-gray-500">/day</span>
+                            </div>
+                            <a href="#" class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-md transition text-sm font-medium">
+                                Book Now
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-    </footer>
+    </section>
 
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    <script type="module" src="assets/js/vehicles.js"></script>
-    <script>
-        document.getElementById('current-year').textContent = new Date().getFullYear();
-        
-        function toggleMobileSubmenu() {
-            const submenu = document.getElementById('mobile-submenu');
-            submenu.classList.toggle('hidden');
-        }
-    </script>
-</body>
-</html>
+    <!-- Sedans Section -->
+    <section id="sedan" class="py-16 bg-gray-100">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-gray-800 mb-8" data-aos="fade-up">Sedans</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Vehicle 1 -->
+                <div class="vehicle-card bg-white rounded-lg shadow-md overflow-hidden" data-aos="fade-up">
+                    <div class="relative">
+                        <img src="https://source.unsplash.com/400x250/?car,toyota-axio" alt="Toyota Axio" class="w-full h-48 object-cover">
+                        <div class="absolute top-0 right-0 bg-primary-600 text-white px-3 py-1 text-sm font-semibold">
+                            Available
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-1">Toyota Axio</h3>
+                        <p class="text-sm text-gray-500 mb-3">
+                            2018 • Automatic • Petrol
+                        </p>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-md flex items-center">
+                                <i class="fas fa-user-friends mr-1"></i> 5 Seats
+                            </span>
+                            <span class="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-md flex items-center">
+                                <i class="fas fa-suitcase mr-1"></i> 3 Bags
+                            </span>
+                            <span class="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-md flex items-center">
+                                <i class="fas fa-gas-pump mr-1"></i> 16 km/l
+                            </span>
+                            <span class="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-md flex items-center">
+                                <i class="fas fa-snowflake mr-1"></i> A/C
+                            </span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="text-xl font-bold text-primary-600">LKR 6,000</span>
+                                <span class="text-sm text-gray-500">/day</span>
+                            </div>
+                            <a href="#" class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-md transition text-sm font-medium">
+                                Book Now
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Vehicle 2 -->
+                <div class="vehicle-card bg-white rounded-lg shadow-md overflow-hidden" data-aos="fade-up" data-aos-delay="100">
+                    <div class="relative">
+                        <img src="https://source.unsplash.com/400x250/?car,honda-civic" alt="Honda Civic" class="w-full h-48 object-cover">
+                        <div class="absolute top-0 right-0 bg-primary-600 text-white px-3 py-1 text-sm font-semibold">
+                            Available
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-1">Honda Civic</h3>
+                        <p class="text-sm text-gray-500 mb-3">
+                            2019 • Automatic • Petrol
+                        </p>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-md flex items-center">
+                                <i class="fas fa-user-friends mr-1"></i> 5 Seats
+                            </span>
+                            <span class="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-md flex items-center">
+                                <i class="fas fa-suitcase mr-1"></i> 3 Bags
+                            </span>
+                            <span class="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-md flex items-center">
+                                <i class="fas fa-gas-pump mr-1"></i> 15 km/l
+                            </span>
+                            <span class="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-md flex items-center">
+                                <i class="fas fa-snowflake mr-1"></i> A/C
+                            </span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="text-xl font-bold text-primary-600">LKR 7,000</span>
+                                <span class="text-sm text-gray-500">/day</span>
+                            </div>
+                            <a href="#" class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-md transition text-sm font-medium">
+                                Book Now
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Vehicle 3 -->
+                <div class="vehicle-card bg-white rounded-lg shadow-md overflow-hidden" data-aos="fade-up" data-aos-delay="200">
+                    <div class="relative">
+                        <img src="https://source.unsplash.com/400x250/?car,toyota-allion" alt="Toyota Allion" class="w-full h-48 object-cover">
+                        <div class="absolute top-0 right-0 bg-primary-600 text-white px-3 py-1 text-sm font-semibold">
+                            Available
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-1">Toyota Allion</h3>
+                        <p class="text-sm text-gray-500 mb-3">
+                            2017 • Automatic • Petrol
+                        </p>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-md flex items-center">
+                                <i class="fas fa-user-friends mr-1"></i> 5 Seats
+                            </span>
+                            <span class="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-md flex items-center">
+                                <i class="fas fa-suitcase mr-1"></i> 3 Bags
+                            </span>
+                            <span class="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-md flex items-center">
+                                <i class="fas fa-gas-pump mr-1"></i> 14 km/l
+                            </span>
+                            <span class="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-md flex items-center">
+                                <i class="fas fa-snowflake mr-1"></i> A/C
+                            </span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="text-xl font-bold text-primary-600">LKR 6,500</span>
+                                <span class="text-sm text-gray-500">/day</span>
+                            </div>
+                            <a href="#" class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-md transition text-sm font-medium">
+                                Book Now
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SUVs Section -->
+    <section id="suv" class="py-16">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-gray-800 mb-8" data-aos="fade-up">SUVs & Jeeps</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Vehicle 1 -->
+                <div class="vehicle-card bg-white rounded-lg shadow-md overflow-hidden" data-aos="fade-up">
+                    <div class="relative">
+                        <img src="https://source.unsplash.com/400x250/?car,toyota-prado" alt="Toyota Prado" class="w-full h-48 object-cover">
+                        <div class="absolute top-0 right-0 bg-primary-600 text-white px-3 py-1 text-sm font-semibold">
+                            Available
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-1">Toyota Prado</h3>
+                        <p class="text-sm text-gray-500 mb-3">
+                            2019 • Automatic • Diesel
+                        </p>
+                        <div class="flex flex-
