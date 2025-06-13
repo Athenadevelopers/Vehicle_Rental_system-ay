@@ -1,30 +1,49 @@
-# Php mysql project
+# Vehicle Rental System - Sri Lanka
 
-*Automatically synced with your [v0.dev](https://v0.dev) deployments*
+A comprehensive vehicle rental management system designed specifically for Sri Lanka.
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/sahanmadusanaka40-gmailcoms-projects/v0-vehicle-rental-system)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.dev-black?style=for-the-badge)](https://v0.dev/chat/projects/FkCOiauqYvM)
+## Features
 
-## Overview
+- Browse and search for vehicles
+- Online booking system
+- User authentication
+- Admin dashboard
+- Responsive design
 
-This repository will stay in sync with your deployed chats on [v0.dev](https://v0.dev).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.dev](https://v0.dev).
+## Deployment Instructions
 
-## Deployment
+### Local Development
 
-Your project is live at:
+1. Clone the repository
+2. Install dependencies:
+   \`\`\`
+   npm install
+   \`\`\`
+3. Start the development server:
+   \`\`\`
+   npm run dev
+   \`\`\`
 
-**[https://vercel.com/sahanmadusanaka40-gmailcoms-projects/v0-vehicle-rental-system](https://vercel.com/sahanmadusanaka40-gmailcoms-projects/v0-vehicle-rental-system)**
+### GitHub Pages Deployment
 
-## Build your app
+1. Fork this repository
+2. Enable GitHub Pages in your repository settings
+3. Set the source to the `gh-pages` branch
+4. Push changes to the main branch, and GitHub Actions will automatically deploy to GitHub Pages
 
-Continue building your app on:
+## Manual Deployment to GitHub Pages
 
-**[https://v0.dev/chat/projects/FkCOiauqYvM](https://v0.dev/chat/projects/FkCOiauqYvM)**
+If you prefer to deploy manually:
 
-## How It Works
+1. Build the project:
+   \`\`\`
+   npm run build
+   \`\`\`
+2. Deploy to GitHub Pages:
+   \`\`\`
+   npm run deploy
+   \`\`\`
 
-1. Create and modify your project using [v0.dev](https://v0.dev)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
+## Firebase Configuration
+
+Make sure to update the Firebase configuration in `assets/js/firebase-config.js` with your own Firebase project details.
